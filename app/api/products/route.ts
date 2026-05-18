@@ -1,0 +1,40 @@
+import { NextResponse } from "next/server";
+import { listProducts, upsertProduct } from "@/lib/db";
+
+export const runtime = "nodejs";
+
+function isAuthorized(request: Request) {
+  const password = request.headers.get("x-admin-password");
+  return password && password === (process.env.ADMIN_PASSWORD ?? "ibejinhos123");
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const includeInactive = searchParams.get("admin") === "true";
+  return NextResponse.json(listProducts(includeInactive));
+}
+
+export async function POST(request: Request) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+  }
+
+  const payload = await request.json();
+
+  if (!payload.name || !payload.description || !payload.image || Number(payload.price) <= 0) {
+    return NextResponse.json({ error: "Preencha nome, descricao, imagem e preco." }, { status: 400 });
+  }
+
+  const id = upsertProduct({
+    id: payload.id ? Number(payload.id) : undefined,
+    name: String(payload.name),
+    description: String(payload.description),
+    price: Number(payload.price),
+    image: String(payload.image),
+    active: Boolean(payload.active),
+    flavorLimit: Number(payload.flavorLimit ?? 0),
+    flavors: Array.isArray(payload.flavors) ? payload.flavors.map(String) : []
+  });
+
+  return NextResponse.json({ id });
+}

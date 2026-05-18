@@ -1,0 +1,273 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  image       String
+  active      Boolean  @default(true)
+  flavorLimit Int      @default(0) @map("flavor_limit")
+  flavors     Json     @default("[]")
+
+  @@map("products")
+}
+
+model Order {
+  id                           Int      @id @default(autoincrement())
+  orderNumber                  String?  @map("order_number")
+  customerName                 String   @map("customer_name")
+  cpf                          String?
+  whatsapp                     String
+  email                        String?
+  birthdayDay                  Int?     @map("birthday_day")
+  birthdayMonth                Int?     @map("birthday_month")
+  registrationStreet           String?  @map("registration_street")
+  registrationNumber           String?  @map("registration_number")
+  registrationComplement       String?  @map("registration_complement")
+  registrationNeighborhood     String?  @map("registration_neighborhood")
+  registrationCep              String?  @map("registration_cep")
+  deliverySameAsRegistration   Boolean  @default(true) @map("delivery_same_as_registration")
+  recipientName                String?  @map("recipient_name")
+  address                      String?
+  street                       String?
+  number                       String?
+  complement                   String?
+  neighborhood                 String
+  cep                          String
+  items                        Json
+  subtotal                     Float
+  deliveryDistanceKm           Float?   @map("delivery_distance_km")
+  deliveryFee                  Float    @map("delivery_fee")
+  discount                     Float    @default(0)
+  loyaltyOrderCount            Int      @default(1) @map("loyalty_order_count")
+  total                        Float
+  paymentMethod                String   @map("payment_method")
+  receiptPath                  String?  @map("receipt_path")
+  status                       String   @default("preparando")
+  delivered                    Boolean  @default(false)
+  createdAt                    DateTime @default(now()) @map("created_at")
+
+  @@map("orders")
+}
+
+model Customer {
+  id            Int      @id @default(autoincrement())
+  name          String
+  cpf           String   @unique
+  password      String
+  email         String?
+  whatsapp      String
+  birthdayDay   Int?     @map("birthday_day")
+  birthdayMonth Int?     @map("birthday_month")
+  street        String
+  number        String
+  complement    String?
+  neighborhood  String
+  cep           String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("customers")
+}
+
+model StoreSettings {
+  id                Int   @id
+  minimumOrderValue Float @default(0) @map("minimum_order_value")
+
+  @@map("store_settings")
+}
+
+model InventoryIngredient {
+  id              Int      @id @default(autoincrement())
+  name            String
+  unit            String
+  currentQuantity Float    @default(0) @map("current_quantity")
+  minimumQuantity Float    @default(0) @map("minimum_quantity")
+  purchaseCost    Float    @default(0) @map("purchase_cost")
+  supplier        String?
+  lastPurchaseDate String? @map("last_purchase_date")
+  expiryDate      String?  @map("expiry_date")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  cardItems TechnicalCardItem[]
+  movements StockMovement[]
+
+  @@map("inventory_ingredients")
+}
+
+model InventoryProduct {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  category           String
+  salePrice          Float    @default(0) @map("sale_price")
+  packagingName      String?  @map("packaging_name")
+  packagingCost      Float    @default(0) @map("packaging_cost")
+  productionTime     String?  @map("production_time")
+  notes              String?
+  finishedStock      Float    @default(0) @map("finished_stock")
+  trackFinishedStock Boolean  @default(true) @map("track_finished_stock")
+  desiredMargin      Float    @default(60) @map("desired_margin")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  card        TechnicalCard?
+  productions Production[]
+  sales       InventorySale[]
+  movements   StockMovement[]
+
+  @@map("inventory_products")
+}
+
+model TechnicalCard {
+  id              Int      @id @default(autoincrement())
+  productId       Int      @unique @map("product_id")
+  packagingName   String?  @map("packaging_name")
+  packagingCost   Float    @default(0) @map("packaging_cost")
+  yieldQuantity   Float    @default(1) @map("yield_quantity")
+  yieldWeightGrams Float   @default(0) @map("yield_weight_grams")
+  unitWeightGrams Float    @default(0) @map("unit_weight_grams")
+  notes           String?
+
+  product InventoryProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  items   TechnicalCardItem[]
+
+  @@map("technical_cards")
+}
+
+model TechnicalCardItem {
+  id           Int   @id @default(autoincrement())
+  cardId       Int   @map("card_id")
+  ingredientId Int   @map("ingredient_id")
+  quantity     Float @default(0)
+
+  card       TechnicalCard        @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  ingredient InventoryIngredient  @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@map("technical_card_items")
+}
+
+model StockMovement {
+  id           Int      @id @default(autoincrement())
+  ingredientId Int?     @map("ingredient_id")
+  productId    Int?     @map("product_id")
+  type         String
+  quantity     Float
+  unitCost     Float    @default(0) @map("unit_cost")
+  totalCost    Float    @default(0) @map("total_cost")
+  note         String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  ingredient InventoryIngredient? @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+  product    InventoryProduct?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("stock_movements")
+}
+
+model Production {
+  id               Int      @id @default(autoincrement())
+  productId        Int      @map("product_id")
+  quantityProduced Float    @map("quantity_produced")
+  productionDate   String   @map("production_date")
+  expiryDate       String?  @map("expiry_date")
+  notes            String?
+  totalCost        Float    @default(0) @map("total_cost")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  product InventoryProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("productions")
+}
+
+model InventorySale {
+  id              Int      @id @default(autoincrement())
+  productId       Int      @map("product_id")
+  quantity        Float
+  saleDate        String   @map("sale_date")
+  totalValue      Float    @map("total_value")
+  paymentMethod   String   @map("payment_method")
+  notes           String?
+  estimatedProfit Float    @default(0) @map("estimated_profit")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  product InventoryProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_sales")
+}
+
+model ErpExpense {
+  id        Int      @id @default(autoincrement())
+  name      String
+  category  String
+  amount    Float
+  dueDate   String   @map("due_date")
+  paid      Boolean  @default(false)
+  recurring Boolean  @default(false)
+  type      String   @default("fixa")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("erp_expenses")
+}
+
+model ErpReceivable {
+  id           Int      @id @default(autoincrement())
+  customerName String   @map("customer_name")
+  description  String
+  amount       Float
+  dueDate      String   @map("due_date")
+  received     Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("erp_receivables")
+}
+
+model DeliveryRun {
+  id               Int      @id @default(autoincrement())
+  courierName      String   @map("courier_name")
+  routeName        String   @map("route_name")
+  orderIds         Json     @default("[]") @map("order_ids")
+  totalKm          Float    @default(0) @map("total_km")
+  estimatedMinutes Int      @default(0) @map("estimated_minutes")
+  status           String   @default("planejada")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("delivery_runs")
+}
+
+model LoyaltyRules {
+  id                 Int   @id
+  pointsPerReal      Float @default(1) @map("points_per_real")
+  cashbackPercent    Float @default(3) @map("cashback_percent")
+  vipThresholdPoints Int   @default(1200) @map("vip_threshold_points")
+  inactiveDays       Int   @default(45) @map("inactive_days")
+
+  @@map("loyalty_rules")
+}
+
+model AppUser {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("app_users")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actor     String
+  action    String
+  entity    String
+  details   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
