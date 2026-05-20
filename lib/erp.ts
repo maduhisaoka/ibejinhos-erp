@@ -201,7 +201,15 @@ async function getInventorySummary() {
     topProducts: []
   };
 
-  if (usePostgres) return empty;
+  if (usePostgres) {
+    try {
+      const { listPostgresInventorySummary } = await import("@/lib/inventoryPostgres");
+      return await listPostgresInventorySummary();
+    } catch (error) {
+      console.error("Falha ao carregar estoque no ERP.", error);
+      return empty;
+    }
+  }
 
   try {
     return eval("require")("./inventory").listInventorySummary();

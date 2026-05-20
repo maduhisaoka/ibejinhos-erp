@@ -12,12 +12,30 @@ function errorResponse(error: unknown, status = 400) {
   return NextResponse.json({ error: error instanceof Error ? error.message : "Não foi possível concluir a ação." }, { status });
 }
 
+function emptyErpSummary() {
+  return {
+    kpis: {},
+    financial: { expenses: [], receivables: [], dre: [] },
+    crm: { customers: [], vip: [], inactive: [], recurring: [], birthdays: [] },
+    loyalty: { rules: { pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 }, topCustomers: [] },
+    marketing: { campaigns: [] },
+    delivery: { batches: [], totalKm: 0, estimatedMinutes: 0 },
+    intelligence: { alerts: [], productProfit: [], demandSuggestions: [], reorderSuggestions: [] },
+    admin: { users: [], auditLogs: [] }
+  };
+}
+
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
-  return NextResponse.json(await getErpSummary());
+  try {
+    return NextResponse.json(await getErpSummary());
+  } catch (error) {
+    console.error("Falha ao carregar ERP.", error);
+    return NextResponse.json(emptyErpSummary());
+  }
 }
 
 export async function POST(request: Request) {

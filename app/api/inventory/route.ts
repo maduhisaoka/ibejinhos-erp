@@ -31,6 +31,10 @@ export async function GET(request: Request) {
   }
 
   try {
+    if (process.env.DATABASE_URL) {
+      const { listPostgresInventorySummary } = await import("@/lib/inventoryPostgres");
+      return NextResponse.json(await listPostgresInventorySummary());
+    }
     const { listInventorySummary } = await import("@/lib/inventory");
     return NextResponse.json(listInventorySummary());
   } catch (error) {
