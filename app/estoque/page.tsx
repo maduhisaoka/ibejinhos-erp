@@ -85,6 +85,18 @@ const blankSale = {
   notes: ""
 };
 
+const defaultSummary: Summary = {
+  ingredients: [],
+  products: [],
+  productions: [],
+  sales: [],
+  movements: [],
+  totalStockValue: 0,
+  lowIngredients: [],
+  averageProductCost: 0,
+  topProducts: []
+};
+
 function asText(value: unknown) {
   return value === null || value === undefined ? "" : String(value);
 }
@@ -98,6 +110,22 @@ function formatDate(value: unknown) {
   const text = asText(value);
   if (!text) return "-";
   return new Date(`${text}T00:00:00`).toLocaleDateString("pt-BR");
+}
+
+function normalizeSummary(data: Partial<Summary> | null | undefined): Summary {
+  return {
+    ...defaultSummary,
+    ...data,
+    ingredients: data?.ingredients ?? [],
+    products: data?.products ?? [],
+    productions: data?.productions ?? [],
+    sales: data?.sales ?? [],
+    movements: data?.movements ?? [],
+    lowIngredients: data?.lowIngredients ?? [],
+    topProducts: data?.topProducts ?? [],
+    totalStockValue: asNumber(data?.totalStockValue),
+    averageProductCost: asNumber(data?.averageProductCost)
+  };
 }
 
 function StatusPill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "danger" | "good" }) {
@@ -135,8 +163,8 @@ export default function StockPage() {
     card.yieldWeightGrams > 0 && card.unitWeightGrams > 0 ? card.yieldWeightGrams / card.unitWeightGrams : card.yieldQuantity;
   const dashboard = useMemo(() => {
     if (!summary) return null;
-    const estimatedRevenue = summary.sales.reduce((sum, item) => sum + item.totalValue, 0);
-    const estimatedProfit = summary.sales.reduce((sum, item) => sum + item.estimatedProfit, 0);
+    const estimatedRevenue = summary.sales.reduce((sum, item) => sum + asNumber(item.totalValue), 0);
+    const estimatedProfit = summary.sales.reduce((sum, item) => sum + asNumber(item.estimatedProfit), 0);
     return { estimatedRevenue, estimatedProfit };
   }, [summary]);
 
@@ -164,21 +192,22 @@ export default function StockPage() {
       setMessage(data.error ?? "Não consegui carregar o estoque agora. Tente novamente em instantes.");
       return;
     }
-    setSummary(data);
+    const normalized = normalizeSummary(data);
+    setSummary(normalized);
     window.localStorage.setItem(adminPasswordKey, secret);
     window.localStorage.setItem(adminUnlockedKey, "true");
     window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(true);
     setMessage("");
 
-    if (!cardProductId && data.products?.[0]) {
-      fillCard(data.products[0]);
+    if (!cardProductId && normalized.products[0]) {
+      fillCard(normalized.products[0]);
     }
-    if (!entry.ingredientId && data.ingredients?.[0]) {
-      setEntry((current) => ({ ...current, ingredientId: data.ingredients[0].id, unitCost: data.ingredients[0].purchaseCost }));
+    if (!entry.ingredientId && normalized.ingredients[0]) {
+      setEntry((current) => ({ ...current, ingredientId: normalized.ingredients[0].id, unitCost: normalized.ingredients[0].purchaseCost }));
     }
-    if (!production.productId && data.products?.[0]) setProduction((current) => ({ ...current, productId: data.products[0].id }));
-    if (!sale.productId && data.products?.[0]) setSale((current) => ({ ...current, productId: data.products[0].id, totalValue: data.products[0].salePrice }));
+    if (!production.productId && normalized.products[0]) setProduction((current) => ({ ...current, productId: normalized.products[0].id }));
+    if (!sale.productId && normalized.products[0]) setSale((current) => ({ ...current, productId: normalized.products[0].id, totalValue: normalized.products[0].salePrice }));
   }
 
   useEffect(() => {

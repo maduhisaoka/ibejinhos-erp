@@ -14,7 +14,21 @@ function errorResponse(error: unknown, status = 400) {
 
 function emptyErpSummary() {
   return {
-    kpis: {},
+    kpis: {
+      revenue: 0,
+      weeklyRevenue: 0,
+      monthlyRevenue: 0,
+      grossProfit: 0,
+      netProfit: 0,
+      cogs: 0,
+      margin: 0,
+      orders: 0,
+      activeCustomers: 0,
+      inventoryValue: 0,
+      openExpenses: 0,
+      openReceivables: 0,
+      pendingDeliveries: 0
+    },
     financial: { expenses: [], receivables: [], dre: [] },
     crm: { customers: [], vip: [], inactive: [], recurring: [], birthdays: [] },
     loyalty: { rules: { pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 }, topCustomers: [] },

@@ -48,8 +48,111 @@ const blankExpense = {
   type: "variavel"
 };
 
+const defaultErpSummary: ErpSummary = {
+  kpis: {
+    revenue: 0,
+    weeklyRevenue: 0,
+    monthlyRevenue: 0,
+    grossProfit: 0,
+    netProfit: 0,
+    cogs: 0,
+    margin: 0,
+    orders: 0,
+    activeCustomers: 0,
+    inventoryValue: 0,
+    openExpenses: 0,
+    openReceivables: 0,
+    pendingDeliveries: 0
+  },
+  financial: { expenses: [], receivables: [], dre: [] },
+  crm: { customers: [], vip: [], inactive: [], recurring: [], birthdays: [] },
+  loyalty: { rules: { pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 }, topCustomers: [] },
+  marketing: { campaigns: [] },
+  delivery: { batches: [], totalKm: 0, estimatedMinutes: 0 },
+  intelligence: { alerts: [], productProfit: [], demandSuggestions: [], reorderSuggestions: [] },
+  admin: { users: [], auditLogs: [] }
+};
+
 function asText(value: unknown) {
   return value === null || value === undefined ? "" : String(value);
+}
+
+function asNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeErpSummary(data: Partial<ErpSummary> | null | undefined): ErpSummary {
+  const kpis = data?.kpis ?? {};
+  return {
+    ...defaultErpSummary,
+    ...data,
+    kpis: {
+      ...defaultErpSummary.kpis,
+      ...kpis,
+      revenue: asNumber(kpis.revenue),
+      weeklyRevenue: asNumber(kpis.weeklyRevenue),
+      monthlyRevenue: asNumber(kpis.monthlyRevenue),
+      grossProfit: asNumber(kpis.grossProfit),
+      netProfit: asNumber(kpis.netProfit),
+      cogs: asNumber(kpis.cogs),
+      margin: asNumber(kpis.margin),
+      orders: asNumber(kpis.orders),
+      activeCustomers: asNumber(kpis.activeCustomers),
+      inventoryValue: asNumber(kpis.inventoryValue),
+      openExpenses: asNumber(kpis.openExpenses),
+      openReceivables: asNumber(kpis.openReceivables),
+      pendingDeliveries: asNumber(kpis.pendingDeliveries)
+    },
+    financial: {
+      ...defaultErpSummary.financial,
+      ...(data?.financial ?? {}),
+      expenses: data?.financial?.expenses ?? [],
+      receivables: data?.financial?.receivables ?? [],
+      dre: data?.financial?.dre ?? []
+    },
+    crm: {
+      ...defaultErpSummary.crm,
+      ...(data?.crm ?? {}),
+      customers: data?.crm?.customers ?? [],
+      vip: data?.crm?.vip ?? [],
+      inactive: data?.crm?.inactive ?? [],
+      recurring: data?.crm?.recurring ?? [],
+      birthdays: data?.crm?.birthdays ?? []
+    },
+    loyalty: {
+      ...defaultErpSummary.loyalty,
+      ...(data?.loyalty ?? {}),
+      rules: { ...defaultErpSummary.loyalty.rules, ...(data?.loyalty?.rules ?? {}) },
+      topCustomers: data?.loyalty?.topCustomers ?? []
+    },
+    marketing: {
+      ...defaultErpSummary.marketing,
+      ...(data?.marketing ?? {}),
+      campaigns: data?.marketing?.campaigns ?? []
+    },
+    delivery: {
+      ...defaultErpSummary.delivery,
+      ...(data?.delivery ?? {}),
+      batches: data?.delivery?.batches ?? [],
+      totalKm: asNumber(data?.delivery?.totalKm),
+      estimatedMinutes: asNumber(data?.delivery?.estimatedMinutes)
+    },
+    intelligence: {
+      ...defaultErpSummary.intelligence,
+      ...(data?.intelligence ?? {}),
+      alerts: data?.intelligence?.alerts ?? [],
+      productProfit: data?.intelligence?.productProfit ?? [],
+      demandSuggestions: data?.intelligence?.demandSuggestions ?? [],
+      reorderSuggestions: data?.intelligence?.reorderSuggestions ?? []
+    },
+    admin: {
+      ...defaultErpSummary.admin,
+      ...(data?.admin ?? {}),
+      users: data?.admin?.users ?? [],
+      auditLogs: data?.admin?.auditLogs ?? []
+    }
+  };
 }
 
 function formatDate(value: string) {
@@ -86,7 +189,7 @@ export default function ErpPage() {
   const [rules, setRules] = useState({ pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 });
 
   const topProfitMax = useMemo(() => {
-    return Math.max(...(summary?.intelligence.productProfit.map((item) => item.profitAmount) ?? [1]), 1);
+    return Math.max(...(summary?.intelligence?.productProfit?.map((item) => asNumber(item.profitAmount)) ?? [1]), 1);
   }, [summary]);
 
   async function load(secret = password) {
@@ -113,8 +216,9 @@ export default function ErpPage() {
       setMessage(data.error ?? "Não consegui carregar o ERP agora. Tente novamente em instantes.");
       return;
     }
-    setSummary(data);
-    setRules(data.loyalty.rules);
+    const normalized = normalizeErpSummary(data);
+    setSummary(normalized);
+    setRules(normalized.loyalty.rules);
     window.localStorage.setItem(adminPasswordKey, secret);
     window.localStorage.setItem(adminUnlockedKey, "true");
     window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
