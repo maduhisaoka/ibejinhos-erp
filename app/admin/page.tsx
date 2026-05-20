@@ -127,8 +127,8 @@ export default function AdminPage() {
     ]);
 
     if (!ordersResponse.ok) {
-      setMessage("Senha inválida.");
-      setUnlocked(false);
+      setMessage("Nao consegui carregar os pedidos agora. Confira o deploy e tente novamente.");
+      setUnlocked(true);
       return;
     }
 
@@ -144,6 +144,7 @@ export default function AdminPage() {
     const stored = window.localStorage.getItem("ibejinhos-admin-password");
     if (stored) {
       setPassword(stored);
+      setUnlocked(true);
       loadAdminData(stored);
     }
   }, []);

@@ -143,8 +143,8 @@ export default function StockPage() {
     const response = await fetch("/api/inventory", { headers: { "x-admin-password": secret } });
     const data = await response.json();
     if (!response.ok) {
-      setMessage(data.error ?? "Senha invalida.");
-      setUnlocked(false);
+      setMessage(data.error ?? "Nao consegui carregar o estoque agora. Confira o deploy e tente novamente.");
+      setUnlocked(true);
       return;
     }
     setSummary(data);
@@ -165,6 +165,7 @@ export default function StockPage() {
     const stored = window.localStorage.getItem("ibejinhos-admin-password");
     if (stored) {
       setPassword(stored);
+      setUnlocked(true);
       load(stored);
     }
   }, []);
@@ -230,7 +231,7 @@ export default function StockPage() {
     }
   }
 
-  if (!unlocked || !summary) {
+  if (!unlocked) {
     return (
       <main className="mx-auto grid min-h-[calc(100vh-76px)] max-w-md place-items-center px-4">
         <div className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
@@ -239,6 +240,20 @@ export default function StockPage() {
           <p className="mt-2 leading-6 text-truffle">Esta area fica dentro da gestao. Entre primeiro pela central administrativa.</p>
           {message && <p className="mt-3 rounded-lg bg-blush/50 p-3 text-sm font-bold text-cocoa">{message}</p>}
           <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-black text-cream">Ir para gestao</Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <main className="mx-auto grid min-h-[calc(100vh-76px)] max-w-md place-items-center px-4">
+        <div className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
+          <Save className="mb-4 text-gold" size={30} />
+          <h1 className="text-2xl font-black text-cocoa">Carregando estoque</h1>
+          <p className="mt-2 leading-6 text-truffle">{message || "Abrindo os dados da gestao..."}</p>
+          <button onClick={() => load(password)} className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-black text-cream">Tentar novamente</button>
+          <Link href="/gestao" className="mt-3 inline-flex w-full justify-center rounded-full bg-white px-5 py-3 font-black text-cocoa shadow-soft">Voltar para gestao</Link>
         </div>
       </main>
     );
