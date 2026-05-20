@@ -53,6 +53,15 @@ function hasUsableCpf(value: string) {
   return cpf.length === 11 && !/^(\d)\1{10}$/.test(cpf);
 }
 
+function localPortalData(customer: CustomerSession): CustomerPortalData {
+  return {
+    customer,
+    birthdayCouponAvailable: false,
+    loyalty: emptyLoyalty,
+    orders: []
+  };
+}
+
 const blankRegister: RegisterForm = {
   name: "",
   cpf: "",
@@ -85,6 +94,7 @@ export default function ClientePage() {
     const storedPassword = getCustomerSessionPassword();
     if (current) {
       setSession(current);
+      setData(localPortalData(current));
       setCpf(formatCpf(current.cpf));
       setPassword(storedPassword);
       if (storedPassword) {
@@ -95,7 +105,6 @@ export default function ClientePage() {
 
   async function loadPortal(nextCpf = cpf, nextPassword = password) {
     setError("");
-    setData(null);
     const normalizedCpf = normalizeCpf(nextCpf);
     if (!hasUsableCpf(normalizedCpf) || nextPassword.length < 1) {
       setError("Informe CPF e senha.");
@@ -108,6 +117,13 @@ export default function ClientePage() {
       const payload = await readJson(response);
 
       if (!response.ok) {
+        const current = getCustomerSession();
+        if (current && normalizeCpf(current.cpf) === normalizedCpf) {
+          setSession(current);
+          setData((existing) => existing ?? localPortalData(current));
+          setMessage("Seus dados continuam salvos neste aparelho.");
+          return;
+        }
         setError(payload.error ?? "Não foi possível entrar.");
         return;
       }
@@ -117,6 +133,13 @@ export default function ClientePage() {
       setData(payload);
       setMessage("Cadastro liberado. Você já pode comprar.");
     } catch {
+      const current = getCustomerSession();
+      if (current && normalizeCpf(current.cpf) === normalizedCpf) {
+        setSession(current);
+        setData((existing) => existing ?? localPortalData(current));
+        setMessage("Seus dados continuam salvos neste aparelho.");
+        return;
+      }
       setError("Não foi possível entrar agora. Confira sua conexão e tente novamente.");
     } finally {
       setLoading(false);
