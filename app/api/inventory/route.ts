@@ -28,7 +28,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
-  return NextResponse.json(listInventorySummary());
+  try {
+    return NextResponse.json(listInventorySummary());
+  } catch (error) {
+    console.error("Falha ao carregar estoque.", error);
+    return NextResponse.json({
+      ingredients: [],
+      products: [],
+      productions: [],
+      sales: [],
+      movements: [],
+      totalStockValue: 0,
+      lowIngredients: [],
+      averageProductCost: 0,
+      topProducts: []
+    });
+  }
 }
 
 export async function POST(request: Request) {

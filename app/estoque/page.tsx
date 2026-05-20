@@ -142,11 +142,16 @@ export default function StockPage() {
   async function load(secret = password) {
     const response = await fetch("/api/inventory", { headers: { "x-admin-password": secret } });
     const data = await response.json();
-    if (!response.ok) {
+    if (response.status === 401) {
       window.localStorage.removeItem("ibejinhos-admin-password");
       window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
       setMessage("Entre novamente pela gestão.");
       setUnlocked(false);
+      return;
+    }
+    if (!response.ok) {
+      setUnlocked(true);
+      setMessage(data.error ?? "Não consegui carregar o estoque agora. Tente novamente em instantes.");
       return;
     }
     setSummary(data);

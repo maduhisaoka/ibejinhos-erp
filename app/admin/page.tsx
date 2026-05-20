@@ -126,7 +126,7 @@ export default function AdminPage() {
       fetch("/api/settings")
     ]);
 
-    if (!ordersResponse.ok) {
+    if (ordersResponse.status === 401) {
       window.localStorage.removeItem("ibejinhos-admin-password");
       window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
       setMessage("Entre novamente pela gestão.");
@@ -134,7 +134,13 @@ export default function AdminPage() {
       return;
     }
 
-    setProducts(await productsResponse.json());
+    if (!ordersResponse.ok) {
+      setUnlocked(true);
+      setMessage("Não consegui carregar os pedidos agora. Tente novamente em instantes.");
+      return;
+    }
+
+    if (productsResponse.ok) setProducts(await productsResponse.json());
     setOrders(await ordersResponse.json());
     if (customersResponse.ok) setCustomers(await customersResponse.json());
     if (settingsResponse.ok) setSettings(await settingsResponse.json());
