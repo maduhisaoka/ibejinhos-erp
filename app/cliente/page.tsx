@@ -121,7 +121,6 @@ export default function ClientePage() {
         if (current && normalizeCpf(current.cpf) === normalizedCpf) {
           setSession(current);
           setData((existing) => existing ?? localPortalData(current));
-          setMessage("Seus dados continuam salvos neste aparelho.");
           return;
         }
         setError(payload.error ?? "Não foi possível entrar.");
@@ -131,13 +130,12 @@ export default function ClientePage() {
       setCustomerSession(payload.customer, nextPassword);
       setSession(payload.customer);
       setData(payload);
-      setMessage("Cadastro liberado. Você já pode comprar.");
+      setMessage("");
     } catch {
       const current = getCustomerSession();
       if (current && normalizeCpf(current.cpf) === normalizedCpf) {
         setSession(current);
         setData((existing) => existing ?? localPortalData(current));
-        setMessage("Seus dados continuam salvos neste aparelho.");
         return;
       }
       setError("Não foi possível entrar agora. Confira sua conexão e tente novamente.");
@@ -208,7 +206,7 @@ export default function ClientePage() {
       setCpf(formatCpf(payload.customer.cpf));
       setPassword(register.password);
       setMode("login");
-      setMessage("Cadastro criado. Agora o cardápio está liberado para você.");
+      setMessage("");
       setData({
         customer: payload.customer,
         birthdayCouponAvailable: Boolean(payload.birthdayCouponAvailable),
@@ -256,16 +254,13 @@ export default function ClientePage() {
     setSession(null);
     setData(null);
     setPassword("");
-    setMessage("Você saiu do cadastro.");
+    setMessage("");
   }
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold">Cliente</p>
       <h1 className="mt-3 text-3xl font-bold text-cocoa sm:text-5xl">Meus pedidos</h1>
-      <p className="mt-4 leading-7 text-truffle">
-        Acompanhe seus pedidos, veja seu Cartão Doce e mantenha seus dados salvos neste aparelho.
-      </p>
 
       {session && (
         <div className="mt-6 flex flex-col justify-between gap-3 rounded-lg bg-white/78 p-4 shadow-soft sm:flex-row sm:items-center">
@@ -338,9 +333,6 @@ export default function ClientePage() {
         <section className="mt-6 space-y-5">
           <article className="rounded-lg border border-cocoa/10 bg-white/78 p-5 shadow-soft">
             <h2 className="text-xl font-bold text-cocoa">Fidelidade</h2>
-            <p className="mt-2 leading-6 text-truffle">
-              {data.loyalty.rewardDescription}
-            </p>
             <div className="mt-4 rounded-lg bg-cream p-4">
               <div className="flex items-center justify-between gap-3 text-sm font-black text-cocoa">
                 <span>Cartão atual</span>
@@ -355,9 +347,6 @@ export default function ClientePage() {
                   : `Faltam ${data.loyalty.ordersUntilDiscount} pedido(s) para liberar o mimo.`}
               </p>
             </div>
-            <p className="mt-3 text-sm font-bold text-truffle">
-              Total histórico: {data.loyalty.previousOrders} pedido(s).
-            </p>
             {data.birthdayCouponAvailable && <p className="mt-3 rounded-lg bg-cream p-3 text-sm font-bold text-cocoa">Cupom de aniversário ativo: 15% de desconto nesta semana.</p>}
           </article>
 

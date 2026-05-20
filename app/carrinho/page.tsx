@@ -11,8 +11,7 @@ import {
   getClosedOrderMessage,
   getFormattedNextDeliveryDate,
   isOrderWindowOpen,
-  isTestOrderAccessEnabled,
-  orderScheduleMessage
+  isTestOrderAccessEnabled
 } from "@/lib/orderSchedule";
 import type { CartItem, Customer, LoyaltySummary, PaymentMethod, StoreSettings } from "@/lib/types";
 
@@ -412,12 +411,6 @@ export default function CarrinhoPage() {
 
       <aside className="h-fit rounded-lg border border-cocoa/10 bg-white/78 p-5 shadow-soft">
         <h2 className="text-xl font-bold text-cocoa">Entrega e pagamento</h2>
-        <p className="mt-2 text-sm leading-6 text-truffle">
-          Entregamos em até 5 km de Moema. O frete é calculado para o endereço informado, considerando distância, gasolina e deslocamento.
-        </p>
-        <p className="mt-3 rounded-lg bg-cream p-3 text-sm font-bold leading-6 text-cocoa">
-          {orderScheduleMessage} Próxima entrega: {nextDeliveryDate}.
-        </p>
         {!orderWindowOpen && (
           <p className="mt-3 rounded-lg bg-blush/70 p-3 text-sm font-bold leading-6 text-cocoa">
             {getClosedOrderMessage()}
@@ -441,14 +434,6 @@ export default function CarrinhoPage() {
               Comprando como {session.name}<br />
               {session.email} - {session.whatsapp}
             </div>
-          )}
-          {loyalty && (
-            <p className="rounded-lg bg-white p-3 text-sm font-bold leading-6 text-cocoa">
-              Cartão Doce: {loyalty.cycleOrderCount}/10 pedido(s) neste ciclo.{" "}
-              {loyalty.qualifiesForDiscount
-                ? "Este pedido recebe 10% de desconto e depois a contagem recomeça."
-                : `Faltam ${loyalty.ordersUntilDiscount} pedido(s) para liberar 10% no próximo pedido.`}
-            </p>
           )}
           {firstOrderFreeDelivery && (
             <p className="rounded-lg bg-white p-3 text-sm font-bold leading-6 text-cocoa">
@@ -479,11 +464,6 @@ export default function CarrinhoPage() {
               <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Complemento da entrega" value={customer.complement} onChange={(event) => updateCustomer("complement", event.target.value)} />
               <input required className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Bairro da entrega" value={customer.neighborhood} onChange={(event) => updateCustomer("neighborhood", event.target.value)} />
             </div>
-          )}
-          {deliveryEstimate?.distanceKm && (
-            <p className="rounded-lg bg-cream p-3 text-sm leading-6 text-truffle">
-              Frete calculado para o endereço informado.
-            </p>
           )}
           {!deliveryAvailable && (
             <p className="rounded-lg bg-blush/70 p-3 text-sm leading-6 text-cocoa">

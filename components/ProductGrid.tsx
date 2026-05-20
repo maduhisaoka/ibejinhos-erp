@@ -20,9 +20,8 @@ export function ProductGrid({ products }: { products: Product[] }) {
   return (
     <>
       {!session && (
-        <div className="mb-5 rounded-lg border border-cocoa/10 bg-white/78 p-4 text-sm font-bold leading-6 text-cocoa shadow-soft">
-          Você pode olhar o cardápio à vontade. Para adicionar ao carrinho, entre ou faça seu cadastro.
-          <Link className="ml-2 underline" href="/cliente">Entrar ou cadastrar</Link>
+        <div className="mb-5 flex justify-end">
+          <Link className="rounded-full bg-cocoa px-5 py-3 text-sm font-bold text-cream shadow-soft" href="/cliente">Entrar ou cadastrar</Link>
         </div>
       )}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
