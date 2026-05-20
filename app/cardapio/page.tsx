@@ -1,10 +1,25 @@
 import { ProductGrid } from "@/components/ProductGrid";
 import { listProducts } from "@/lib/db";
+import { seedProducts } from "@/lib/products";
+import type { Product } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+function fallbackProducts(): Product[] {
+  return seedProducts.map((product, index) => ({ id: index + 1, ...product }));
+}
+
 export default async function CardapioPage() {
-  const products = await listProducts();
+  let products = fallbackProducts();
+
+  try {
+    const dbProducts = await listProducts();
+    if (dbProducts.length > 0) {
+      products = dbProducts;
+    }
+  } catch (error) {
+    console.error("Nao foi possivel carregar produtos do banco.", error);
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">

@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 import { getCustomerByCpf, getLoyaltySummary, listOrdersByCpf, resetCustomerPassword, upsertCustomer, verifyCustomerPassword } from "@/lib/db";
 import { validateCep } from "@/lib/cep";
 import { isBirthdayWeek } from "@/lib/coupons";
-import { isStrongPassword, isValidCpf, isValidEmail, normalizeCpf } from "@/lib/format";
+import { isStrongPassword, isValidEmail, normalizeCpf, onlyDigits } from "@/lib/format";
 
 export const runtime = "nodejs";
+
+function isUsableCpf(value: string) {
+  const cpf = onlyDigits(value);
+  return cpf.length === 11 && !/^(\d)\1{10}$/.test(cpf);
+}
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +17,7 @@ export async function GET(request: Request) {
     const cpf = normalizeCpf(searchParams.get("cpf") ?? "");
     const password = searchParams.get("password") ?? "";
 
-    if (!isValidCpf(cpf)) {
+    if (!isUsableCpf(cpf)) {
       return NextResponse.json({ error: "Informe um CPF válido." }, { status: 400 });
     }
 
@@ -40,7 +45,7 @@ export async function POST(request: Request) {
     const password = String(payload.password ?? "");
     const email = String(payload.email ?? "").trim();
 
-    if (!isValidCpf(cpf)) {
+    if (!isUsableCpf(cpf)) {
       return NextResponse.json({ error: "Informe um CPF válido." }, { status: 400 });
     }
 
@@ -96,7 +101,7 @@ export async function PATCH(request: Request) {
     const cpf = normalizeCpf(String(payload.cpf ?? ""));
     const email = String(payload.email ?? "").trim();
 
-    if (!isValidCpf(cpf) || !isValidEmail(email)) {
+    if (!isUsableCpf(cpf) || !isValidEmail(email)) {
       return NextResponse.json({ error: "Informe CPF e e-mail válidos." }, { status: 400 });
     }
 

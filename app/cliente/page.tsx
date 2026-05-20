@@ -36,6 +36,11 @@ async function readJson(response: Response) {
   }
 }
 
+function hasUsableCpf(value: string) {
+  const cpf = onlyDigits(value);
+  return cpf.length === 11 && !/^(\d)\1{10}$/.test(cpf);
+}
+
 const blankRegister: RegisterForm = {
   name: "",
   cpf: "",
@@ -80,7 +85,7 @@ export default function ClientePage() {
     setError("");
     setData(null);
     const normalizedCpf = normalizeCpf(nextCpf);
-    if (normalizedCpf.length !== 11 || nextPassword.length < 1) {
+    if (!hasUsableCpf(normalizedCpf) || nextPassword.length < 1) {
       setError("Informe CPF e senha.");
       return;
     }
@@ -141,6 +146,11 @@ export default function ClientePage() {
 
     if (!isStrongPassword(register.password)) {
       setError("A senha precisa ter pelo menos 8 caracteres, número e caractere especial.");
+      return;
+    }
+
+    if (!hasUsableCpf(register.cpf)) {
+      setError("Informe um CPF válido com 11 números.");
       return;
     }
 
