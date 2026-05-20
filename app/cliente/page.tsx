@@ -13,6 +13,18 @@ type CustomerPortalData = {
   orders: Order[];
 };
 
+const emptyLoyalty: LoyaltySummary = {
+  previousOrders: 0,
+  currentOrderCount: 1,
+  cycleOrderCount: 0,
+  nextCycleOrderCount: 1,
+  qualifiesForDiscount: false,
+  ordersUntilDiscount: 10,
+  discountRate: 0,
+  rewardLabel: "Cartão Doce Ibejinhos",
+  rewardDescription: "A cada 10 pedidos, o próximo pedido recebe 10% de desconto. Depois de usar o mimo, a contagem recomeça."
+};
+
 type RegisterForm = {
   name: string;
   cpf: string;
@@ -174,7 +186,12 @@ export default function ClientePage() {
       setPassword(register.password);
       setMode("login");
       setMessage("Cadastro criado. Agora o cardápio está liberado para você.");
-      await loadPortal(payload.customer.cpf, register.password);
+      setData({
+        customer: payload.customer,
+        birthdayCouponAvailable: Boolean(payload.birthdayCouponAvailable),
+        loyalty: payload.loyalty ?? emptyLoyalty,
+        orders: payload.orders ?? []
+      });
     } catch {
       setError("Não foi possível cadastrar agora. Confira sua conexão e tente novamente.");
     } finally {
