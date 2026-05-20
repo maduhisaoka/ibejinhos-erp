@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
   }
 
-  return NextResponse.json(listOrders());
+  return NextResponse.json(await listOrders());
 }
 
 export async function PATCH(request: Request) {
@@ -48,11 +48,11 @@ export async function PATCH(request: Request) {
     if (!["preparando", "finalizado"].includes(status)) {
       return NextResponse.json({ error: "Status invalido." }, { status: 400 });
     }
-    updateOrderStatus(id, status as "preparando" | "finalizado");
+    await updateOrderStatus(id, status as "preparando" | "finalizado");
   }
 
   if (delivered !== null) {
-    updateOrderDelivered(id, delivered);
+    await updateOrderDelivered(id, delivered);
   }
 
   return NextResponse.json({ ok: true });
@@ -70,7 +70,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Pedido invalido." }, { status: 400 });
   }
 
-  deleteOrder(id);
+  await deleteOrder(id);
   return NextResponse.json({ ok: true });
 }
 
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Informe um CPF valido." }, { status: 400 });
   }
 
-  const registeredCustomer = getCustomerByCpf(String(payload.cpf ?? ""));
+  const registeredCustomer = await getCustomerByCpf(String(payload.cpf ?? ""));
   if (!registeredCustomer) {
     return NextResponse.json({ error: "Entre no cadastro antes de finalizar o pedido." }, { status: 400 });
   }
@@ -148,12 +148,12 @@ export async function POST(request: Request) {
   }
 
   const subtotal = calculateSubtotal(items);
-  const settings = getStoreSettings();
+  const settings = await getStoreSettings();
   if (subtotal < settings.minimumOrderValue) {
     return NextResponse.json({ error: `O pedido minimo e de R$ ${settings.minimumOrderValue.toFixed(2).replace(".", ",")}.` }, { status: 400 });
   }
 
-  const loyalty = getLoyaltySummary(String(payload.cpf));
+  const loyalty = await getLoyaltySummary(String(payload.cpf));
   const deliveryEstimate = calculateDeliveryFee(checkedDeliveryNeighborhood, deliveryCep);
   const deliveryFee = loyalty.previousOrders === 0 ? 0 : deliveryEstimate.deliveryFee;
   const distanceKm = deliveryEstimate.distanceKm;
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
   const discount = Number((subtotal * discountRate).toFixed(2));
   const paymentMethod = String(payload.paymentMethod ?? "Pix") === "Credito" ? "Credito" : "Pix" as PaymentMethod;
 
-  const id = createOrder({
+  const id = await createOrder({
     orderNumber: "",
     customerName: String(payload.name),
     cpf: normalizeCpf(String(payload.cpf)),
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
     delivered: false
   });
   const orderNumber = makeOrderNumber(id);
-  updateOrderNumber(id, orderNumber);
+  await updateOrderNumber(id, orderNumber);
 
   return NextResponse.json({
     id,

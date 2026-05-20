@@ -11,7 +11,7 @@ function isAuthorized(request: Request) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const includeInactive = searchParams.get("admin") === "true";
-  return NextResponse.json(listProducts(includeInactive));
+  return NextResponse.json(await listProducts(includeInactive));
 }
 
 export async function POST(request: Request) {
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Preencha nome, descricao, imagem e preco." }, { status: 400 });
   }
 
-  const id = upsertProduct({
+  const id = await upsertProduct({
     id: payload.id ? Number(payload.id) : undefined,
     name: String(payload.name),
     description: String(payload.description),

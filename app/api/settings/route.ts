@@ -9,7 +9,7 @@ function isAuthorized(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json(getStoreSettings());
+  return NextResponse.json(await getStoreSettings());
 }
 
 export async function PATCH(request: Request) {
@@ -18,9 +18,9 @@ export async function PATCH(request: Request) {
   }
 
   const payload = await request.json();
-  updateStoreSettings({
+  await updateStoreSettings({
     minimumOrderValue: Math.max(0, Number(payload.minimumOrderValue ?? 0))
   });
 
-  return NextResponse.json(getStoreSettings());
+  return NextResponse.json(await getStoreSettings());
 }

@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
   }
 
-  return NextResponse.json(listCustomers());
+  return NextResponse.json(await listCustomers());
 }
 
 export async function DELETE(request: Request) {
@@ -27,6 +27,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Cliente invalido." }, { status: 400 });
   }
 
-  deleteCustomer(id);
+  await deleteCustomer(id);
   return NextResponse.json({ ok: true });
 }

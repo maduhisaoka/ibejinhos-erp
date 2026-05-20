@@ -15,17 +15,17 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Informe um CPF valido." }, { status: 400 });
   }
 
-  if (!verifyCustomerPassword(cpf, password)) {
+  if (!(await verifyCustomerPassword(cpf, password))) {
     return NextResponse.json({ error: "CPF ou senha incorretos." }, { status: 401 });
   }
 
-  const customer = getCustomerByCpf(cpf);
+  const customer = await getCustomerByCpf(cpf);
 
   return NextResponse.json({
     customer,
     birthdayCouponAvailable: customer ? isBirthdayWeek(customer.birthdayDay, customer.birthdayMonth) : false,
-    loyalty: getLoyaltySummary(cpf),
-    orders: listOrdersByCpf(cpf)
+    loyalty: await getLoyaltySummary(cpf),
+    orders: await listOrdersByCpf(cpf)
   });
 }
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Preencha os dados obrigatorios." }, { status: 400 });
   }
 
-  upsertCustomer({
+  await upsertCustomer({
     name: String(payload.name),
     cpf,
     password,
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     cep: String(payload.cep)
   });
 
-  return NextResponse.json({ customer: getCustomerByCpf(cpf) });
+  return NextResponse.json({ customer: await getCustomerByCpf(cpf) });
 }
 
 function makeTemporaryPassword() {
@@ -89,7 +89,7 @@ export async function PATCH(request: Request) {
   }
 
   const temporaryPassword = makeTemporaryPassword();
-  const updated = resetCustomerPassword(cpf, email, temporaryPassword);
+  const updated = await resetCustomerPassword(cpf, email, temporaryPassword);
 
   if (!updated) {
     return NextResponse.json({ error: "Não encontramos cadastro com este CPF e e-mail." }, { status: 404 });

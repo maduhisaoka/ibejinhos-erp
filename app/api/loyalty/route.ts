@@ -11,5 +11,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "CPF invalido." }, { status: 400 });
   }
 
-  return NextResponse.json(getLoyaltySummary(customerKey));
+  return NextResponse.json(await getLoyaltySummary(customerKey));
 }

@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   if (folder === "receipts") {
     const orderId = Number(formData.get("orderId"));
     if (orderId) {
-      updateOrderReceipt(orderId, url);
+      await updateOrderReceipt(orderId, url);
     }
   }
 

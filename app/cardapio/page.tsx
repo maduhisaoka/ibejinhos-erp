@@ -3,8 +3,8 @@ import { listProducts } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default function CardapioPage() {
-  const products = listProducts();
+export default async function CardapioPage() {
+  const products = await listProducts();
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">

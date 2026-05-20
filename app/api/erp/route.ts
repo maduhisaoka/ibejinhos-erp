@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
   }
 
-  return NextResponse.json(getErpSummary());
+  return NextResponse.json(await getErpSummary());
 }
 
 export async function POST(request: Request) {
@@ -30,14 +30,14 @@ export async function POST(request: Request) {
 
   try {
     if (action === "createExpense") {
-      return NextResponse.json({ id: createErpExpense(payload.expense) });
+      return NextResponse.json({ id: await createErpExpense(payload.expense) });
     }
     if (action === "toggleExpense") {
-      toggleExpensePaid(Number(payload.id), Boolean(payload.paid));
+      await toggleExpensePaid(Number(payload.id), Boolean(payload.paid));
       return NextResponse.json({ ok: true });
     }
     if (action === "updateLoyalty") {
-      updateLoyaltyRules(payload.rules);
+      await updateLoyaltyRules(payload.rules);
       return NextResponse.json({ ok: true });
     }
 
