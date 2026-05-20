@@ -127,8 +127,10 @@ export default function AdminPage() {
     ]);
 
     if (!ordersResponse.ok) {
-      setMessage("Não consegui carregar os pedidos agora. Confira o deploy e tente novamente.");
-      setUnlocked(true);
+      window.localStorage.removeItem("ibejinhos-admin-password");
+      window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
+      setMessage("Entre novamente pela gestão.");
+      setUnlocked(false);
       return;
     }
 

@@ -37,20 +37,9 @@ export default function GestaoPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("ibejinhos-admin-password");
-    if (stored) {
-      setPassword(stored);
-      fetch("/api/admin-auth", { headers: { "x-admin-password": stored } }).then((response) => {
-        if (response.ok) {
-          setUnlocked(true);
-          return;
-        }
-        window.localStorage.removeItem("ibejinhos-admin-password");
-        window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
-        setPassword("");
-        setUnlocked(false);
-      });
-    }
+    window.localStorage.removeItem("ibejinhos-admin-password");
+    window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
+    setUnlocked(false);
   }, []);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {

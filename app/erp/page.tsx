@@ -92,8 +92,10 @@ export default function ErpPage() {
     const response = await fetch("/api/erp", { headers: { "x-admin-password": secret } });
     const data = await response.json();
     if (!response.ok) {
-      setMessage(data.error ?? "Não consegui carregar o ERP agora. Confira o deploy e tente novamente.");
-      setUnlocked(true);
+      window.localStorage.removeItem("ibejinhos-admin-password");
+      window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
+      setMessage("Entre novamente pela gestão.");
+      setUnlocked(false);
       return;
     }
     setSummary(data);
