@@ -149,6 +149,13 @@ export default function AdminPage() {
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage("Entrando...");
+    const authResponse = await fetch("/api/admin-auth", { headers: { "x-admin-password": password } });
+    if (!authResponse.ok) {
+      setMessage("Senha invalida.");
+      setUnlocked(false);
+      return;
+    }
     window.localStorage.setItem("ibejinhos-admin-password", password);
     await loadAdminData(password);
   }
@@ -469,7 +476,7 @@ export default function AdminPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
           {message && <p className="mt-3 rounded-lg bg-blush p-3 text-sm text-cocoa">{message}</p>}
-          <button className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-bold text-cream">Entrar</button>
+          <button type="submit" className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-bold text-cream">Entrar</button>
         </form>
       </main>
     );

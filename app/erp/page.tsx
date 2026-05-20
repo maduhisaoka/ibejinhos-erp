@@ -111,6 +111,13 @@ export default function ErpPage() {
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage("Entrando...");
+    const authResponse = await fetch("/api/admin-auth", { headers: { "x-admin-password": password } });
+    if (!authResponse.ok) {
+      setMessage("Senha invalida.");
+      setUnlocked(false);
+      return;
+    }
     window.localStorage.setItem("ibejinhos-admin-password", password);
     await load(password);
   }
@@ -140,7 +147,7 @@ export default function ErpPage() {
           <p className="mt-2 leading-6 text-truffle">Entre com a senha do painel para ver financeiro, CRM, fidelidade, marketing e entregas.</p>
           <input className="mt-5 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Senha" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
           {message && <p className="mt-3 rounded-lg bg-blush/45 p-3 text-sm font-bold text-cocoa">{message}</p>}
-          <button className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-black text-cream">Entrar</button>
+          <button type="submit" className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-black text-cream">Entrar</button>
         </form>
       </main>
     );
