@@ -7,71 +7,82 @@ import { isStrongPassword, isValidCpf, isValidEmail, normalizeCpf } from "@/lib/
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const cpf = normalizeCpf(searchParams.get("cpf") ?? "");
-  const password = searchParams.get("password") ?? "";
+  try {
+    const { searchParams } = new URL(request.url);
+    const cpf = normalizeCpf(searchParams.get("cpf") ?? "");
+    const password = searchParams.get("password") ?? "";
 
-  if (!isValidCpf(cpf)) {
-    return NextResponse.json({ error: "Informe um CPF valido." }, { status: 400 });
+    if (!isValidCpf(cpf)) {
+      return NextResponse.json({ error: "Informe um CPF válido." }, { status: 400 });
+    }
+
+    if (!(await verifyCustomerPassword(cpf, password))) {
+      return NextResponse.json({ error: "CPF ou senha incorretos." }, { status: 401 });
+    }
+
+    const customer = await getCustomerByCpf(cpf);
+
+    return NextResponse.json({
+      customer,
+      birthdayCouponAvailable: customer ? isBirthdayWeek(customer.birthdayDay, customer.birthdayMonth) : false,
+      loyalty: await getLoyaltySummary(cpf),
+      orders: await listOrdersByCpf(cpf)
+    });
+  } catch {
+    return NextResponse.json({ error: "Não foi possível carregar seus dados agora." }, { status: 500 });
   }
-
-  if (!(await verifyCustomerPassword(cpf, password))) {
-    return NextResponse.json({ error: "CPF ou senha incorretos." }, { status: 401 });
-  }
-
-  const customer = await getCustomerByCpf(cpf);
-
-  return NextResponse.json({
-    customer,
-    birthdayCouponAvailable: customer ? isBirthdayWeek(customer.birthdayDay, customer.birthdayMonth) : false,
-    loyalty: await getLoyaltySummary(cpf),
-    orders: await listOrdersByCpf(cpf)
-  });
 }
 
 export async function POST(request: Request) {
-  const payload = await request.json();
-  const cpf = normalizeCpf(String(payload.cpf ?? ""));
-  const password = String(payload.password ?? "");
-  const email = String(payload.email ?? "").trim();
-  const cepData = await validateCep(String(payload.cep ?? ""));
+  try {
+    const payload = await request.json();
+    const cpf = normalizeCpf(String(payload.cpf ?? ""));
+    const password = String(payload.password ?? "");
+    const email = String(payload.email ?? "").trim();
 
-  if (!isValidCpf(cpf)) {
-    return NextResponse.json({ error: "Informe um CPF valido." }, { status: 400 });
+    if (!isValidCpf(cpf)) {
+      return NextResponse.json({ error: "Informe um CPF válido." }, { status: 400 });
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: "Informe um e-mail válido." }, { status: 400 });
+    }
+
+    if (!isStrongPassword(password)) {
+      return NextResponse.json({ error: "A senha precisa ter pelo menos 8 caracteres, número e caractere especial." }, { status: 400 });
+    }
+
+    if (!String(payload.name ?? "").trim() || !String(payload.whatsapp ?? "").trim() || !String(payload.number ?? "").trim()) {
+      return NextResponse.json({ error: "Preencha os dados obrigatórios." }, { status: 400 });
+    }
+
+    const cepData = await validateCep(String(payload.cep ?? ""));
+    const street = String(payload.street || cepData?.street || "").trim();
+    const neighborhood = String(payload.neighborhood || cepData?.neighborhood || "").trim();
+
+    if (!street || !neighborhood) {
+      return NextResponse.json({ error: "Preencha o endereço completo." }, { status: 400 });
+    }
+
+    await upsertCustomer({
+      name: String(payload.name).trim(),
+      cpf,
+      password,
+      email,
+      whatsapp: String(payload.whatsapp).trim(),
+      birthdayDay: Number(payload.birthdayDay) || null,
+      birthdayMonth: Number(payload.birthdayMonth) || null,
+      street,
+      number: String(payload.number).trim(),
+      complement: String(payload.complement ?? "").trim(),
+      neighborhood,
+      cep: String(payload.cep)
+    });
+
+    return NextResponse.json({ customer: await getCustomerByCpf(cpf) });
+  } catch {
+    return NextResponse.json({ error: "Não foi possível concluir o cadastro agora." }, { status: 500 });
   }
-
-  if (!isValidEmail(email)) {
-    return NextResponse.json({ error: "Informe um e-mail valido." }, { status: 400 });
-  }
-
-  if (!isStrongPassword(password)) {
-    return NextResponse.json({ error: "A senha precisa ter pelo menos 8 caracteres, numero e caractere especial." }, { status: 400 });
-  }
-
-  if (!cepData) {
-    return NextResponse.json({ error: "CEP não encontrado." }, { status: 400 });
-  }
-
-  if (!String(payload.name ?? "") || !String(payload.whatsapp ?? "") || !String(payload.number ?? "")) {
-    return NextResponse.json({ error: "Preencha os dados obrigatorios." }, { status: 400 });
-  }
-
-  await upsertCustomer({
-    name: String(payload.name),
-    cpf,
-    password,
-    email,
-    whatsapp: String(payload.whatsapp),
-    birthdayDay: Number(payload.birthdayDay) || null,
-    birthdayMonth: Number(payload.birthdayMonth) || null,
-    street: String(payload.street || cepData.street),
-    number: String(payload.number),
-    complement: String(payload.complement ?? ""),
-    neighborhood: String(payload.neighborhood || cepData.neighborhood),
-    cep: String(payload.cep)
-  });
-
-  return NextResponse.json({ customer: await getCustomerByCpf(cpf) });
 }
 
 function makeTemporaryPassword() {
@@ -80,24 +91,28 @@ function makeTemporaryPassword() {
 }
 
 export async function PATCH(request: Request) {
-  const payload = await request.json();
-  const cpf = normalizeCpf(String(payload.cpf ?? ""));
-  const email = String(payload.email ?? "").trim();
+  try {
+    const payload = await request.json();
+    const cpf = normalizeCpf(String(payload.cpf ?? ""));
+    const email = String(payload.email ?? "").trim();
 
-  if (!isValidCpf(cpf) || !isValidEmail(email)) {
-    return NextResponse.json({ error: "Informe CPF e e-mail validos." }, { status: 400 });
+    if (!isValidCpf(cpf) || !isValidEmail(email)) {
+      return NextResponse.json({ error: "Informe CPF e e-mail válidos." }, { status: 400 });
+    }
+
+    const temporaryPassword = makeTemporaryPassword();
+    const updated = await resetCustomerPassword(cpf, email, temporaryPassword);
+
+    if (!updated) {
+      return NextResponse.json({ error: "Não encontramos cadastro com este CPF e e-mail." }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "Enviamos uma senha temporária para o e-mail cadastrado.",
+      temporaryPassword
+    });
+  } catch {
+    return NextResponse.json({ error: "Não foi possível recuperar a senha agora." }, { status: 500 });
   }
-
-  const temporaryPassword = makeTemporaryPassword();
-  const updated = await resetCustomerPassword(cpf, email, temporaryPassword);
-
-  if (!updated) {
-    return NextResponse.json({ error: "Não encontramos cadastro com este CPF e e-mail." }, { status: 404 });
-  }
-
-  return NextResponse.json({
-    ok: true,
-    message: "Enviamos uma senha temporária para o e-mail cadastrado.",
-    temporaryPassword
-  });
 }

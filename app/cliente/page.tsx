@@ -28,6 +28,14 @@ type RegisterForm = {
   neighborhood: string;
 };
 
+async function readJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+}
+
 const blankRegister: RegisterForm = {
   name: "",
   cpf: "",
@@ -78,19 +86,24 @@ export default function ClientePage() {
     }
 
     setLoading(true);
-    const response = await fetch(`/api/customer?cpf=${normalizedCpf}&password=${encodeURIComponent(nextPassword)}`);
-    const payload = await response.json();
-    setLoading(false);
+    try {
+      const response = await fetch(`/api/customer?cpf=${normalizedCpf}&password=${encodeURIComponent(nextPassword)}`);
+      const payload = await readJson(response);
 
-    if (!response.ok) {
-      setError(payload.error ?? "Não foi possível entrar.");
-      return;
+      if (!response.ok) {
+        setError(payload.error ?? "Não foi possível entrar.");
+        return;
+      }
+
+      setCustomerSession(payload.customer, nextPassword);
+      setSession(payload.customer);
+      setData(payload);
+      setMessage("Cadastro liberado. Você já pode comprar.");
+    } catch {
+      setError("Não foi possível entrar agora. Confira sua conexão e tente novamente.");
+    } finally {
+      setLoading(false);
     }
-
-    setCustomerSession(payload.customer, nextPassword);
-    setSession(payload.customer);
-    setData(payload);
-    setMessage("Cadastro liberado. Você já pode comprar.");
   }
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
@@ -102,19 +115,23 @@ export default function ClientePage() {
     const digits = onlyDigits(cep);
     if (digits.length !== 8) return;
 
-    const response = await fetch(`/api/cep?cep=${digits}`);
-    const payload = await response.json();
-    if (!response.ok) {
-      setError(payload.error ?? "CEP não encontrado.");
-      return;
-    }
+    try {
+      const response = await fetch(`/api/cep?cep=${digits}`);
+      const payload = await readJson(response);
+      if (!response.ok) {
+        setError(payload.error ?? "CEP não encontrado.");
+        return;
+      }
 
-    setRegister((current) => ({
-      ...current,
-      cep: formatCep(digits),
-      street: payload.street || current.street,
-      neighborhood: payload.neighborhood || current.neighborhood
-    }));
+      setRegister((current) => ({
+        ...current,
+        cep: formatCep(digits),
+        street: payload.street || current.street,
+        neighborhood: payload.neighborhood || current.neighborhood
+      }));
+    } catch {
+      setError("Não foi possível buscar o CEP agora. Preencha o endereço manualmente.");
+    }
   }
 
   async function handleRegister(event: FormEvent<HTMLFormElement>) {
@@ -128,26 +145,31 @@ export default function ClientePage() {
     }
 
     setLoading(true);
-    const response = await fetch("/api/customer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...register, cpf: normalizeCpf(register.cpf) })
-    });
-    const payload = await response.json();
-    setLoading(false);
+    try {
+      const response = await fetch("/api/customer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...register, cpf: normalizeCpf(register.cpf) })
+      });
+      const payload = await readJson(response);
 
-    if (!response.ok) {
-      setError(payload.error ?? "Não foi possível cadastrar.");
-      return;
+      if (!response.ok) {
+        setError(payload.error ?? "Não foi possível cadastrar.");
+        return;
+      }
+
+      setCustomerSession(payload.customer, register.password);
+      setSession(payload.customer);
+      setCpf(formatCpf(payload.customer.cpf));
+      setPassword(register.password);
+      setMode("login");
+      setMessage("Cadastro criado. Agora o cardápio está liberado para você.");
+      await loadPortal(payload.customer.cpf, register.password);
+    } catch {
+      setError("Não foi possível cadastrar agora. Confira sua conexão e tente novamente.");
+    } finally {
+      setLoading(false);
     }
-
-    setCustomerSession(payload.customer, register.password);
-    setSession(payload.customer);
-    setCpf(formatCpf(payload.customer.cpf));
-    setPassword(register.password);
-    setMode("login");
-    setMessage("Cadastro criado. Agora o cardápio está liberado para você.");
-    await loadPortal(payload.customer.cpf, register.password);
   }
 
   async function handleForgot(event: FormEvent<HTMLFormElement>) {
@@ -156,22 +178,27 @@ export default function ClientePage() {
     setMessage("");
 
     setLoading(true);
-    const response = await fetch("/api/customer", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cpf: normalizeCpf(cpf), email: resetEmail })
-    });
-    const payload = await response.json();
-    setLoading(false);
+    try {
+      const response = await fetch("/api/customer", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cpf: normalizeCpf(cpf), email: resetEmail })
+      });
+      const payload = await readJson(response);
 
-    if (!response.ok) {
-      setError(payload.error ?? "Não foi possível recuperar a senha.");
-      return;
+      if (!response.ok) {
+        setError(payload.error ?? "Não foi possível recuperar a senha.");
+        return;
+      }
+
+      setPassword(payload.temporaryPassword ?? "");
+      setMode("login");
+      setMessage(`Senha temporária enviada para o e-mail cadastrado. Para teste local: ${payload.temporaryPassword}`);
+    } catch {
+      setError("Não foi possível recuperar a senha agora. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-
-    setPassword(payload.temporaryPassword ?? "");
-    setMode("login");
-    setMessage(`Senha temporária enviada para o e-mail cadastrado. Para teste local: ${payload.temporaryPassword}`);
   }
 
   function logout() {
