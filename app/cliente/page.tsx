@@ -187,7 +187,7 @@ export default function ClientePage() {
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold">Cliente</p>
       <h1 className="mt-3 text-3xl font-bold text-cocoa sm:text-5xl">Meus pedidos</h1>
       <p className="mt-4 leading-7 text-truffle">
-        Acompanhe seus pedidos, veja seu Cartao Doce e mantenha seus dados salvos neste aparelho.
+        Acompanhe seus pedidos, veja seu Cartão Doce e mantenha seus dados salvos neste aparelho.
       </p>
 
       {session && (
@@ -266,7 +266,7 @@ export default function ClientePage() {
             </p>
             <div className="mt-4 rounded-lg bg-cream p-4">
               <div className="flex items-center justify-between gap-3 text-sm font-black text-cocoa">
-                <span>Cartao atual</span>
+                <span>Cartão atual</span>
                 <span>{data.loyalty.cycleOrderCount}/10 pedidos</span>
               </div>
               <div className="mt-3 h-3 overflow-hidden rounded-full bg-white">
@@ -274,12 +274,12 @@ export default function ClientePage() {
               </div>
               <p className="mt-3 text-sm font-bold text-truffle">
                 {data.loyalty.qualifiesForDiscount
-                  ? "Seu desconto esta liberado para o proximo pedido. Depois dele, o cartao volta para 0/10."
+                  ? "Seu desconto está liberado para o próximo pedido. Depois dele, o cartão volta para 0/10."
                   : `Faltam ${data.loyalty.ordersUntilDiscount} pedido(s) para liberar o mimo.`}
               </p>
             </div>
             <p className="mt-3 text-sm font-bold text-truffle">
-              Total historico: {data.loyalty.previousOrders} pedido(s).
+              Total histórico: {data.loyalty.previousOrders} pedido(s).
             </p>
             {data.birthdayCouponAvailable && <p className="mt-3 rounded-lg bg-cream p-3 text-sm font-bold text-cocoa">Cupom de aniversário ativo: 15% de desconto nesta semana.</p>}
           </article>

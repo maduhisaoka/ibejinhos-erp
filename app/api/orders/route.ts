@@ -24,7 +24,7 @@ function getSelectedFlavorTotal(item: CartItem) {
 
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   return NextResponse.json(await listOrders());
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   const payload = await request.json();
@@ -41,12 +41,12 @@ export async function PATCH(request: Request) {
   const delivered = typeof payload.delivered === "boolean" ? payload.delivered : null;
 
   if (!id) {
-    return NextResponse.json({ error: "Pedido invalido." }, { status: 400 });
+    return NextResponse.json({ error: "Pedido inválido." }, { status: 400 });
   }
 
   if (status) {
     if (!["preparando", "finalizado"].includes(status)) {
-      return NextResponse.json({ error: "Status invalido." }, { status: 400 });
+      return NextResponse.json({ error: "Status inválido." }, { status: 400 });
     }
     await updateOrderStatus(id, status as "preparando" | "finalizado");
   }
@@ -60,14 +60,14 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   const payload = await request.json();
   const id = Number(payload.id);
 
   if (!id) {
-    return NextResponse.json({ error: "Pedido invalido." }, { status: 400 });
+    return NextResponse.json({ error: "Pedido inválido." }, { status: 400 });
   }
 
   await deleteOrder(id);
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
 
   const registrationCepData = await validateCep(String(payload.registrationCep ?? ""));
   if (!registrationCepData) {
-    return NextResponse.json({ error: "CEP de cadastro nao encontrado." }, { status: 400 });
+    return NextResponse.json({ error: "CEP do cadastro não encontrado." }, { status: 400 });
   }
 
   if (!deliveryStreet || !deliveryNumber || !deliveryNeighborhood || onlyDigits(deliveryCep).length !== 8) {
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 
   const deliveryCepData = await validateCep(deliveryCep);
   if (!deliveryCepData) {
-    return NextResponse.json({ error: "CEP de entrega nao encontrado." }, { status: 400 });
+    return NextResponse.json({ error: "CEP de entrega não encontrado." }, { status: 400 });
   }
   const checkedDeliveryNeighborhood = deliveryCepData.neighborhood || deliveryNeighborhood;
 
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "No momento, entregamos apenas em um raio de ate 5 km de Moema. Mas voce pode falar conosco pelo WhatsApp para consultar disponibilidade."
+          "No momento, entregamos apenas em um raio de até 5 km de Moema. Mas você pode falar conosco pelo WhatsApp para consultar disponibilidade."
       },
       { status: 400 }
     );
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
   const subtotal = calculateSubtotal(items);
   const settings = await getStoreSettings();
   if (subtotal < settings.minimumOrderValue) {
-    return NextResponse.json({ error: `O pedido minimo e de R$ ${settings.minimumOrderValue.toFixed(2).replace(".", ",")}.` }, { status: 400 });
+    return NextResponse.json({ error: `O pedido mínimo é de R$ ${settings.minimumOrderValue.toFixed(2).replace(".", ",")}.` }, { status: 400 });
   }
 
   const loyalty = await getLoyaltySummary(String(payload.cpf));

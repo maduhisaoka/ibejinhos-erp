@@ -134,9 +134,9 @@ function seedSqliteErp(db: SqliteDb) {
     `);
     [
       ["Embalagens premium", "Insumos", 420, "2026-05-20", 0, 0, "variavel"],
-      ["Anuncio Instagram", "Marketing", 180, "2026-05-22", 0, 1, "variavel"],
-      ["Energia cozinha", "Operacao", 260, "2026-05-25", 1, 1, "fixa"],
-      ["Motoboy sabados", "Entrega", 340, "2026-05-30", 0, 1, "variavel"]
+      ["Anúncio Instagram", "Marketing", 180, "2026-05-22", 0, 1, "variavel"],
+      ["Energia da cozinha", "Operação", 260, "2026-05-25", 1, 1, "fixa"],
+      ["Motoboy sábados", "Entrega", 340, "2026-05-30", 0, 1, "variavel"]
     ].forEach(([name, category, amount, dueDate, paid, recurring, type]) => {
       insert.run({ name, category, amount, dueDate, paid, recurring, type });
     });
@@ -155,7 +155,7 @@ function seedSqliteErp(db: SqliteDb) {
     const insertUser = db.prepare("INSERT INTO app_users (name, email, role) VALUES (@name, @email, @role)");
     [
       ["Ibe", "admin@ibejinhos.com", "admin"],
-      ["Producao", "producao@ibejinhos.com", "producao"],
+      ["Produção", "producao@ibejinhos.com", "producao"],
       ["Entrega", "entrega@ibejinhos.com", "entrega"]
     ].forEach(([name, email, role]) => insertUser.run({ name, email, role }));
   }
@@ -347,7 +347,7 @@ export async function getErpSummary() {
 
   const lowStock = inventory.lowIngredients.map((item: Row) => ({
     title: text(item.name),
-    detail: `${number(item.currentQuantity)} ${text(item.unit)} em estoque, minimo ${number(item.minimumQuantity)}`,
+    detail: `${number(item.currentQuantity)} ${text(item.unit)} em estoque, mínimo ${number(item.minimumQuantity)}`,
     action: "Comprar"
   }));
   const expiringSoon = inventory.ingredients.filter((item: Row) => {
@@ -390,7 +390,7 @@ export async function getErpSummary() {
         { label: "CMV estimado", amount: -cogs },
         { label: "Lucro bruto", amount: grossProfit },
         { label: "Despesas pagas", amount: -paidExpenseTotal },
-        { label: "Lucro liquido", amount: netProfit }
+        { label: "Lucro líquido", amount: netProfit }
       ]
     },
     crm: {
@@ -407,22 +407,22 @@ export async function getErpSummary() {
     marketing: {
       campaigns: [
         {
-          name: "Recuperacao de inativos",
+          name: "Recuperação de inativos",
           channel: "WhatsApp",
           audience: customerSegments.filter((customer) => customer.segment === "Inativo").length,
-          suggestion: "Enviar cupom VOLTAIBE com 10% para quem nao compra ha mais de 45 dias."
+          suggestion: "Enviar cupom VOLTAIBE com 10% para quem não compra há mais de 45 dias."
         },
         {
           name: "Aniversariantes",
           channel: "WhatsApp",
           audience: customerSegments.filter((customer) => customer.birthday).length,
-          suggestion: "Oferecer brigadeiro cortesia no pedido da semana do aniversario."
+          suggestion: "Oferecer brigadeiro cortesia no pedido da semana do aniversário."
         },
         {
           name: "VIP boutique",
           channel: "Instagram/WhatsApp",
           audience: customerSegments.filter((customer) => customer.segment === "VIP").length,
-          suggestion: "Abrir pre-venda de kits premium antes do cardapio geral."
+          suggestion: "Abrir pré-venda de kits premium antes do cardápio geral."
         }
       ]
     },

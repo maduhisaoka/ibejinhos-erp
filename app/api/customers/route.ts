@@ -10,7 +10,7 @@ function isAuthorized(request: Request) {
 
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   return NextResponse.json(await listCustomers());
@@ -18,13 +18,13 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   const payload = await request.json();
   const id = Number(payload.id);
   if (!id) {
-    return NextResponse.json({ error: "Cliente invalido." }, { status: 400 });
+    return NextResponse.json({ error: "Cliente inválido." }, { status: 400 });
   }
 
   await deleteCustomer(id);

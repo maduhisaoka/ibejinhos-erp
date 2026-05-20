@@ -40,7 +40,7 @@ const today = new Date().toISOString().slice(0, 10);
 
 const blankExpense = {
   name: "",
-  category: "Operacao",
+  category: "Operação",
   amount: 0,
   dueDate: today,
   recurring: false,
@@ -92,7 +92,7 @@ export default function ErpPage() {
     const response = await fetch("/api/erp", { headers: { "x-admin-password": secret } });
     const data = await response.json();
     if (!response.ok) {
-      setMessage(data.error ?? "Nao consegui carregar o ERP agora. Confira o deploy e tente novamente.");
+      setMessage(data.error ?? "Não consegui carregar o ERP agora. Confira o deploy e tente novamente.");
       setUnlocked(true);
       return;
     }
@@ -116,7 +116,7 @@ export default function ErpPage() {
     setMessage("Entrando...");
     const authResponse = await fetch("/api/admin-auth", { headers: { "x-admin-password": password } });
     if (!authResponse.ok) {
-      setMessage("Senha invalida.");
+      setMessage("Senha inválida.");
       setUnlocked(false);
       return;
     }
@@ -132,7 +132,7 @@ export default function ErpPage() {
     });
     const data = await response.json();
     if (!response.ok) {
-      setMessage(data.error ?? "Nao foi possivel salvar.");
+      setMessage(data.error ?? "Não foi possível salvar.");
       return false;
     }
     setMessage(success);
@@ -146,9 +146,9 @@ export default function ErpPage() {
         <div className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
           <Lock className="mb-4 text-gold" size={30} />
           <h1 className="text-2xl font-black text-cocoa">ERP Ibejinhos</h1>
-          <p className="mt-2 leading-6 text-truffle">Esta area fica dentro da gestao. Entre primeiro pela central administrativa.</p>
+          <p className="mt-2 leading-6 text-truffle">Esta área fica dentro da gestão. Entre primeiro pela central administrativa.</p>
           {message && <p className="mt-3 rounded-lg bg-blush/45 p-3 text-sm font-bold text-cocoa">{message}</p>}
-          <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-black text-cream">Ir para gestao</Link>
+          <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-black text-cream">Ir para gestão</Link>
         </div>
       </main>
     );
@@ -160,9 +160,9 @@ export default function ErpPage() {
         <div className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
           <Bike className="mb-4 text-gold" size={30} />
           <h1 className="text-2xl font-black text-cocoa">Carregando ERP</h1>
-          <p className="mt-2 leading-6 text-truffle">{message || "Abrindo os dados da gestao..."}</p>
+          <p className="mt-2 leading-6 text-truffle">{message || "Abrindo os dados da gestão..."}</p>
           <button onClick={() => load(password)} className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-black text-cream">Tentar novamente</button>
-          <Link href="/gestao" className="mt-3 inline-flex w-full justify-center rounded-full bg-white px-5 py-3 font-black text-cocoa shadow-soft">Voltar para gestao</Link>
+          <Link href="/gestao" className="mt-3 inline-flex w-full justify-center rounded-full bg-white px-5 py-3 font-black text-cocoa shadow-soft">Voltar para gestão</Link>
         </div>
       </main>
     );
@@ -172,12 +172,12 @@ export default function ErpPage() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-7 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Operacao integrada</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Operação integrada</p>
           <h1 className="mt-2 text-3xl font-black text-cocoa sm:text-5xl">ERP Ibejinhos</h1>
-          <p className="mt-3 max-w-2xl leading-7 text-truffle">Pedidos, estoque, producao, financeiro, clientes e entregas conversando em um painel de gestao boutique.</p>
+          <p className="mt-3 max-w-2xl leading-7 text-truffle">Pedidos, estoque, produção, financeiro, clientes e entregas conversando em um painel de gestão boutique.</p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Metric label="Mes" value={formatCurrency(summary.kpis.monthlyRevenue)} />
+          <Metric label="Mês" value={formatCurrency(summary.kpis.monthlyRevenue)} />
           <Metric label="Lucro" value={formatCurrency(summary.kpis.netProfit)} />
           <Metric label="Clientes ativos" value={String(summary.kpis.activeCustomers)} />
           <Metric label="Entregas" value={String(summary.kpis.pendingDeliveries)} />
@@ -245,13 +245,13 @@ export default function ErpPage() {
           </article>
 
           <article className="rounded-lg border border-cocoa/10 bg-white/82 p-5 shadow-soft lg:col-span-2">
-            <h2 className="text-xl font-black text-cocoa">Sugestao de producao</h2>
+            <h2 className="text-xl font-black text-cocoa">Sugestão de produção</h2>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {summary.intelligence.demandSuggestions.length === 0 && <p className="rounded-lg bg-cream p-4 font-bold text-truffle">Registre vendas no estoque para gerar previsoes.</p>}
+              {summary.intelligence.demandSuggestions.length === 0 && <p className="rounded-lg bg-cream p-4 font-bold text-truffle">Registre vendas no estoque para gerar previsões.</p>}
               {summary.intelligence.demandSuggestions.map((item) => (
                 <div key={item.productName} className="rounded-lg bg-cream p-4">
                   <strong className="text-cocoa">{item.productName}</strong>
-                  <p className="mt-2 text-sm font-bold text-truffle">Vendeu {item.soldQuantity} un. Sugestao: produzir {item.suggestedProduction} un.</p>
+                  <p className="mt-2 text-sm font-bold text-truffle">Vendeu {item.soldQuantity} un. Sugestão: produzir {item.suggestedProduction} un.</p>
                 </div>
               ))}
             </div>
@@ -276,7 +276,7 @@ export default function ErpPage() {
               <label className="block text-sm font-bold text-cocoa">Vencimento<input className="mt-1 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" type="date" value={expense.dueDate} onChange={(event) => setExpense({ ...expense, dueDate: event.target.value })} /></label>
               <select className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" value={expense.type} onChange={(event) => setExpense({ ...expense, type: event.target.value })}>
                 <option value="fixa">Fixa</option>
-                <option value="variavel">Variavel</option>
+                <option value="variavel">Variável</option>
               </select>
               <label className="flex items-center gap-3 rounded-lg bg-cream px-4 py-3 font-bold text-cocoa"><input type="checkbox" checked={expense.recurring} onChange={(event) => setExpense({ ...expense, recurring: event.target.checked })} /> Recorrente</label>
               <button className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-cocoa px-5 py-3 font-black text-cream"><Plus size={18} /> Registrar</button>
@@ -322,7 +322,7 @@ export default function ErpPage() {
             <h2 className="text-xl font-black text-cocoa">Clientes inteligentes</h2>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-sm">
-                <thead className="bg-cream text-cocoa"><tr><th className="px-4 py-3">Cliente</th><th className="px-4 py-3">Segmento</th><th className="px-4 py-3">Pedidos</th><th className="px-4 py-3">Ticket medio</th><th className="px-4 py-3">Favorito</th><th className="px-4 py-3">Pontos</th></tr></thead>
+                <thead className="bg-cream text-cocoa"><tr><th className="px-4 py-3">Cliente</th><th className="px-4 py-3">Segmento</th><th className="px-4 py-3">Pedidos</th><th className="px-4 py-3">Ticket médio</th><th className="px-4 py-3">Favorito</th><th className="px-4 py-3">Pontos</th></tr></thead>
                 <tbody className="divide-y divide-cocoa/10 bg-white">
                   {summary.crm.customers.map((customer) => (
                     <tr key={customer.key}>
@@ -351,9 +351,9 @@ export default function ErpPage() {
             className="rounded-lg border border-cocoa/10 bg-white/82 p-5 shadow-soft"
           >
             <Gift className="mb-3 text-gold" size={28} />
-            <h2 className="text-xl font-black text-cocoa">Regras configuraveis</h2>
+            <h2 className="text-xl font-black text-cocoa">Regras configuráveis</h2>
             <p className="mt-2 text-sm leading-6 text-truffle">
-              Estas regras servem para classificar clientes no CRM e calcular estimativas internas. O Cartao Doce de 10 pedidos continua valendo para o desconto da loja.
+              Estas regras servem para classificar clientes no CRM e calcular estimativas internas. O Cartão Doce de 10 pedidos continua valendo para o desconto da loja.
             </p>
             <div className="mt-4 space-y-3">
               <label className="block text-sm font-bold text-cocoa">
@@ -373,7 +373,7 @@ export default function ErpPage() {
               </label>
               <label className="block text-sm font-bold text-cocoa">
                 Dias para considerar inativo
-                <span className="mb-1 mt-1 block text-xs font-bold text-truffle">Depois desse tempo sem comprar, o cliente entra em recuperacao.</span>
+                <span className="mb-1 mt-1 block text-xs font-bold text-truffle">Depois desse tempo sem comprar, o cliente entra em recuperação.</span>
                 <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" type="number" step="1" value={rules.inactiveDays} onChange={(event) => setRules({ ...rules, inactiveDays: Number(event.target.value) })} />
               </label>
               <button className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-cocoa px-5 py-3 font-black text-cream"><Save size={18} /> Salvar regras</button>
@@ -416,7 +416,7 @@ export default function ErpPage() {
         <section className="grid gap-5 lg:grid-cols-[0.8fr_1fr]">
           <article className="rounded-lg border border-cocoa/10 bg-white/82 p-5 shadow-soft">
             <Bike className="mb-3 text-gold" size={28} />
-            <h2 className="text-xl font-black text-cocoa">Roteirizacao</h2>
+            <h2 className="text-xl font-black text-cocoa">Roteirização</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <Metric label="Km estimado" value={`${summary.delivery.totalKm.toFixed(1)} km`} />
               <Metric label="Tempo" value={`${summary.delivery.estimatedMinutes} min`} />
@@ -439,8 +439,8 @@ export default function ErpPage() {
 
       {tab === "admin" && (
         <section className="grid gap-5 lg:grid-cols-2">
-          <Table title="Usuarios e permissoes" rows={summary.admin.users} columns={[["name", "Nome"], ["email", "Email"], ["role", "Papel"], ["active", "Ativo"]]} booleanKeys={["active"]} />
-          <Table title="Auditoria" rows={summary.admin.auditLogs} columns={[["created_at", "Data"], ["actor", "Usuario"], ["action", "Acao"], ["details", "Detalhe"]]} />
+          <Table title="Usuários e permissões" rows={summary.admin.users} columns={[["name", "Nome"], ["email", "Email"], ["role", "Papel"], ["active", "Ativo"]]} booleanKeys={["active"]} />
+          <Table title="Auditoria" rows={summary.admin.auditLogs} columns={[["created_at", "Data"], ["actor", "Usuário"], ["action", "Ação"], ["details", "Detalhe"]]} />
         </section>
       )}
     </main>
@@ -471,7 +471,7 @@ function Table({
               <tr key={asText(row.id) || index}>
                 {columns.map(([key]) => {
                   const value = row[key];
-                  const display = currencyKeys.includes(key) ? formatCurrency(Number(value)) : booleanKeys.includes(key) ? (value ? "Sim" : "Nao") : asText(value);
+                  const display = currencyKeys.includes(key) ? formatCurrency(Number(value)) : booleanKeys.includes(key) ? (value ? "Sim" : "Não") : asText(value);
                   return <td key={key} className="px-4 py-3 text-truffle">{display || "-"}</td>;
                 })}
               </tr>

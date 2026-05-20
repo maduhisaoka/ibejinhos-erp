@@ -68,7 +68,7 @@ export function Header() {
         ) : (
           <nav className="flex items-center gap-2 text-sm font-medium text-cocoa">
             <Link className="rounded-full px-3 py-2 hover:bg-blush/55" href="/cardapio">
-              Cardapio
+              Cardápio
             </Link>
             <Link className="rounded-full px-3 py-2 hover:bg-blush/55" href="/cliente">
               Meus pedidos

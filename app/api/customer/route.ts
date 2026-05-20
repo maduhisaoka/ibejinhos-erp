@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   }
 
   if (!cepData) {
-    return NextResponse.json({ error: "CEP nao encontrado." }, { status: 400 });
+    return NextResponse.json({ error: "CEP não encontrado." }, { status: 400 });
   }
 
   if (!String(payload.name ?? "") || !String(payload.whatsapp ?? "") || !String(payload.number ?? "")) {

@@ -318,8 +318,8 @@ function seedInventory() {
       ["Granulado belga", "g", 3200, 900, 0.082, "Doce Distribuidora", "2026-05-08", "2027-03-01"],
       ["Embalagem caixa 9 doces", "unidade", 42, 15, 3.2, "Embalagens Bela", "2026-05-07", ""],
       ["Pote copo felicidade", "unidade", 55, 20, 2.1, "Embalagens Bela", "2026-05-07", ""],
-      ["Massa de bolo chocolate", "kg", 8, 2, 18.5, "Producao propria", "2026-05-12", "2026-05-22"],
-      ["Creme de ninho", "kg", 5, 1.5, 26, "Producao propria", "2026-05-12", "2026-05-20"]
+      ["Massa de bolo chocolate", "kg", 8, 2, 18.5, "Produção própria", "2026-05-12", "2026-05-22"],
+      ["Creme de ninho", "kg", 5, 1.5, 26, "Produção própria", "2026-05-12", "2026-05-20"]
     ];
 
     for (const item of ingredients) {
@@ -529,7 +529,7 @@ export function deleteIngredient(id: number) {
 
 export function addIngredientEntry(payload: { ingredientId: number; quantity: number; unitCost: number; supplier?: string; lastPurchaseDate?: string; expiryDate?: string; note?: string }) {
   const ingredient = inventoryDb.prepare("SELECT * FROM inventory_ingredients WHERE id = @id").get({ id: payload.ingredientId }) as Row | undefined;
-  if (!ingredient) throw new Error("Ingrediente nao encontrado.");
+  if (!ingredient) throw new Error("Ingrediente não encontrado.");
   const quantity = numberValue(payload.quantity);
   const unitCost = numberValue(payload.unitCost) || numberValue(ingredient.purchase_cost);
   if (quantity <= 0) throw new Error("Informe uma quantidade de entrada maior que zero.");
@@ -625,7 +625,7 @@ export function deleteInventoryProduct(id: number) {
 }
 
 export function deleteTechnicalCard(productId: number) {
-  if (!productId) throw new Error("Produto invalido.");
+  if (!productId) throw new Error("Produto inválido.");
   inventoryDb.prepare("DELETE FROM technical_cards WHERE product_id = @productId").run({ productId });
 }
 
@@ -637,7 +637,7 @@ export function upsertTechnicalCard(payload: {
   notes?: string;
   items: { ingredientId: number; quantity: number }[];
 }) {
-  if (!payload.productId) throw new Error("Produto invalido.");
+  if (!payload.productId) throw new Error("Produto inválido.");
   const yieldWeightGrams = numberValue(payload.yieldWeightGrams);
   const unitWeightGrams = numberValue(payload.unitWeightGrams);
   const calculatedYield = yieldWeightGrams > 0 && unitWeightGrams > 0 ? yieldWeightGrams / unitWeightGrams : numberValue(payload.yieldQuantity);
@@ -692,7 +692,7 @@ export function upsertTechnicalCard(payload: {
 
 export function registerProduction(payload: { productId: number; quantityProduced: number; productionDate: string; expiryDate?: string; notes?: string }) {
   const product = mapProduct(inventoryDb.prepare("SELECT * FROM inventory_products WHERE id = @id").get({ id: payload.productId }) as Row);
-  if (!product.card) throw new Error("Cadastre a ficha tecnica antes de produzir.");
+  if (!product.card) throw new Error("Cadastre a ficha técnica antes de produzir.");
   const quantityProduced = numberValue(payload.quantityProduced);
   if (quantityProduced <= 0) throw new Error("Informe uma quantidade produzida maior que zero.");
   const multiplier = quantityProduced / product.card.yieldQuantity;
@@ -718,7 +718,7 @@ export function registerProduction(payload: { productId: number; quantityProduce
         quantity: -requiredQuantity,
         unitCost: item.unitCost,
         totalCost: -(requiredQuantity * item.unitCost),
-        note: `Producao de ${quantityProduced} ${product.name}`
+        note: `Produção de ${quantityProduced} ${product.name}`
       });
     }
 

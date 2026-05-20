@@ -20,12 +20,12 @@ function isAuthorized(request: Request) {
 }
 
 function errorResponse(error: unknown, status = 400) {
-  return NextResponse.json({ error: error instanceof Error ? error.message : "Nao foi possivel concluir a acao." }, { status });
+  return NextResponse.json({ error: error instanceof Error ? error.message : "Não foi possível concluir a ação." }, { status });
 }
 
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   return NextResponse.json(listInventorySummary());
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   const payload = await request.json();
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    return NextResponse.json({ error: "Acao invalida." }, { status: 400 });
+    return NextResponse.json({ error: "Ação inválida." }, { status: 400 });
   } catch (error) {
     return errorResponse(error);
   }

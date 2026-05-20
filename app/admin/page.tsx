@@ -127,7 +127,7 @@ export default function AdminPage() {
     ]);
 
     if (!ordersResponse.ok) {
-      setMessage("Nao consegui carregar os pedidos agora. Confira o deploy e tente novamente.");
+      setMessage("Não consegui carregar os pedidos agora. Confira o deploy e tente novamente.");
       setUnlocked(true);
       return;
     }
@@ -154,7 +154,7 @@ export default function AdminPage() {
     setMessage("Entrando...");
     const authResponse = await fetch("/api/admin-auth", { headers: { "x-admin-password": password } });
     if (!authResponse.ok) {
-      setMessage("Senha invalida.");
+      setMessage("Senha inválida.");
       setUnlocked(false);
       return;
     }
@@ -315,7 +315,7 @@ export default function AdminPage() {
 
   async function removeCustomer(customerId: number) {
     const customer = customers.find((item) => item.id === customerId);
-    const confirmed = window.confirm(`Excluir o cadastro de ${customer?.name ?? "cliente"}? O historico de pedidos sera mantido.`);
+    const confirmed = window.confirm(`Excluir o cadastro de ${customer?.name ?? "cliente"}? O histórico de pedidos será mantido.`);
     if (!confirmed) return;
 
     const previousCustomers = customers;
@@ -469,9 +469,9 @@ export default function AdminPage() {
         <div className="w-full rounded-lg border border-cocoa/10 bg-white/78 p-6 shadow-soft">
           <Lock className="mb-4 text-gold" size={30} />
           <h1 className="text-2xl font-bold text-cocoa">Painel da Ibejinhos</h1>
-          <p className="mt-2 leading-6 text-truffle">Esta area fica dentro da gestao. Entre primeiro pela central administrativa.</p>
+          <p className="mt-2 leading-6 text-truffle">Esta área fica dentro da gestão. Entre primeiro pela central administrativa.</p>
           {message && <p className="mt-3 rounded-lg bg-blush p-3 text-sm text-cocoa">{message}</p>}
-          <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-bold text-cream">Ir para gestao</Link>
+          <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-bold text-cream">Ir para gestão</Link>
         </div>
       </main>
     );

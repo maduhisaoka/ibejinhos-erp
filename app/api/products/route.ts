@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   const payload = await request.json();

@@ -444,15 +444,15 @@ export default function CarrinhoPage() {
           )}
           {loyalty && (
             <p className="rounded-lg bg-white p-3 text-sm font-bold leading-6 text-cocoa">
-              Cartao Doce: {loyalty.cycleOrderCount}/10 pedido(s) neste ciclo.{" "}
+              Cartão Doce: {loyalty.cycleOrderCount}/10 pedido(s) neste ciclo.{" "}
               {loyalty.qualifiesForDiscount
                 ? "Este pedido recebe 10% de desconto e depois a contagem recomeça."
-                : `Faltam ${loyalty.ordersUntilDiscount} pedido(s) para liberar 10% no proximo pedido.`}
+                : `Faltam ${loyalty.ordersUntilDiscount} pedido(s) para liberar 10% no próximo pedido.`}
             </p>
           )}
           {firstOrderFreeDelivery && (
             <p className="rounded-lg bg-white p-3 text-sm font-bold leading-6 text-cocoa">
-              Primeiro pedido: frete gratis aplicado.
+              Primeiro pedido: frete grátis aplicado.
             </p>
           )}
           {birthdayDiscountRate > 0 && (

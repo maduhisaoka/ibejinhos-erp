@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const customerKey = searchParams.get("cpf") ?? searchParams.get("whatsapp") ?? "";
   if (searchParams.get("cpf") && !isValidCpf(customerKey)) {
-    return NextResponse.json({ error: "CPF invalido." }, { status: 400 });
+    return NextResponse.json({ error: "CPF inválido." }, { status: 400 });
   }
 
   return NextResponse.json(await getLoyaltySummary(customerKey));

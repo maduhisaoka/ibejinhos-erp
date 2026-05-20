@@ -361,8 +361,8 @@ export async function getLoyaltySummary(customerKey: string): Promise<LoyaltySum
     qualifiesForDiscount,
     ordersUntilDiscount: qualifiesForDiscount ? 0 : Math.max(0, 10 - cycleOrderCount),
     discountRate: qualifiesForDiscount ? 0.1 : 0,
-    rewardLabel: "Cartao Doce Ibejinhos",
-    rewardDescription: "A cada 10 pedidos, o proximo pedido recebe 10% de desconto. Depois de usar o mimo, a contagem recomeça."
+    rewardLabel: "Cartão Doce Ibejinhos",
+    rewardDescription: "A cada 10 pedidos, o próximo pedido recebe 10% de desconto. Depois de usar o mimo, a contagem recomeça."
   };
 }
 

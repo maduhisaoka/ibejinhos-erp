@@ -7,14 +7,14 @@ import { Bike, Lock, Save, ShoppingBag } from "@/components/Icons";
 const cards = [
   {
     href: "/admin",
-    title: "Pedidos e cardapio",
-    text: "Pedidos do dia, comprovantes, clientes, produtos e configuracoes da loja.",
+    title: "Pedidos e cardápio",
+    text: "Pedidos do dia, comprovantes, clientes, produtos e configurações da loja.",
     icon: ShoppingBag
   },
   {
     href: "/estoque",
-    title: "Estoque e producao",
-    text: "Ingredientes, fichas tecnicas, producao, perdas, vendas e historico.",
+    title: "Estoque e produção",
+    text: "Ingredientes, fichas técnicas, produção, perdas, vendas e histórico.",
     icon: Save
   },
   {
@@ -26,7 +26,7 @@ const cards = [
   {
     href: "/",
     title: "Ver loja",
-    text: "Abrir a loja como cliente para conferir vitrine, cardapio e experiencia de compra.",
+    text: "Abrir a loja como cliente para conferir vitrine, cardápio e experiência de compra.",
     icon: ShoppingBag
   }
 ];
@@ -58,7 +58,7 @@ export default function GestaoPage() {
     setMessage("Entrando...");
     const response = await fetch("/api/admin-auth", { headers: { "x-admin-password": password } });
     if (!response.ok) {
-      setMessage("Senha invalida.");
+      setMessage("Senha inválida.");
       setUnlocked(false);
       return;
     }
@@ -80,9 +80,9 @@ export default function GestaoPage() {
       <main className="mx-auto grid min-h-[calc(100vh-76px)] max-w-md place-items-center px-4">
         <form onSubmit={handleLogin} className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
           <Lock className="mb-4 text-gold" size={30} />
-          <h1 className="text-2xl font-black text-cocoa">Entrada da gestao</h1>
-          <p className="mt-2 leading-6 text-truffle">Esta area e separada da loja do cliente.</p>
-          <input className="mt-5 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Senha da gestao" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+          <h1 className="text-2xl font-black text-cocoa">Entrada da gestão</h1>
+          <p className="mt-2 leading-6 text-truffle">Esta área é separada da loja do cliente.</p>
+          <input className="mt-5 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Senha da gestão" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
           {message && <p className="mt-3 rounded-lg bg-blush/45 p-3 text-sm font-bold text-cocoa">{message}</p>}
           <button type="submit" className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-black text-cream">Entrar</button>
         </form>
@@ -94,9 +94,9 @@ export default function GestaoPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Area interna</p>
-          <h1 className="mt-3 text-3xl font-black text-cocoa sm:text-5xl">Gestao Ibejinhos</h1>
-          <p className="mt-4 max-w-2xl leading-7 text-truffle">Sua entrada privada para administrar loja, estoque, financeiro e operacao.</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Área interna</p>
+          <h1 className="mt-3 text-3xl font-black text-cocoa sm:text-5xl">Gestão Ibejinhos</h1>
+          <p className="mt-4 max-w-2xl leading-7 text-truffle">Sua entrada privada para administrar loja, estoque, financeiro e operação.</p>
         </div>
         <button onClick={logout} className="rounded-full bg-white px-5 py-3 font-black text-cocoa shadow-soft">Sair</button>
       </div>
