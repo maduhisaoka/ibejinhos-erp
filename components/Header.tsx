@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ShoppingBag } from "@/components/Icons";
 import { useCart } from "@/components/CartContext";
+import { adminPasswordKey, adminUnlockedKey } from "@/lib/adminSession";
 
 export function Header() {
   const { count } = useCart();
@@ -15,7 +16,7 @@ export function Header() {
 
   useEffect(() => {
     function syncAdminAccess() {
-      setAdminUnlocked(Boolean(window.localStorage.getItem("ibejinhos-admin-password")));
+      setAdminUnlocked(window.localStorage.getItem(adminUnlockedKey) === "true" || Boolean(window.localStorage.getItem(adminPasswordKey)));
     }
 
     syncAdminAccess();

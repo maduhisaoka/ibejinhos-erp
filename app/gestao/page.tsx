@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { Bike, Lock, Save, ShoppingBag } from "@/components/Icons";
+import { adminPasswordKey, adminUnlockedKey } from "@/lib/adminSession";
 
 const cards = [
   {
@@ -37,7 +38,8 @@ export default function GestaoPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    window.localStorage.removeItem("ibejinhos-admin-password");
+    window.localStorage.removeItem(adminPasswordKey);
+    window.localStorage.removeItem(adminUnlockedKey);
     window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(false);
   }, []);
@@ -51,14 +53,16 @@ export default function GestaoPage() {
       setUnlocked(false);
       return;
     }
-    window.localStorage.setItem("ibejinhos-admin-password", password);
+    window.localStorage.setItem(adminPasswordKey, password);
+    window.localStorage.setItem(adminUnlockedKey, "true");
     window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(true);
     setMessage("");
   }
 
   function logout() {
-    window.localStorage.removeItem("ibejinhos-admin-password");
+    window.localStorage.removeItem(adminPasswordKey);
+    window.localStorage.removeItem(adminUnlockedKey);
     window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(false);
     setPassword("");

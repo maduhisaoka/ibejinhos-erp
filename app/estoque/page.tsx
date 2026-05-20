@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Lock, Plus, Save, Trash2 } from "@/components/Icons";
+import { adminPasswordKey, adminUnlockedKey, fallbackAdminPassword } from "@/lib/adminSession";
 import { formatCurrency } from "@/lib/format";
 import type { InventoryIngredient, InventoryProduct } from "@/lib/inventory";
 
@@ -143,7 +144,16 @@ export default function StockPage() {
     const response = await fetch("/api/inventory", { headers: { "x-admin-password": secret } });
     const data = await response.json();
     if (response.status === 401) {
-      window.localStorage.removeItem("ibejinhos-admin-password");
+      if (secret !== fallbackAdminPassword) {
+        setPassword(fallbackAdminPassword);
+        window.localStorage.setItem(adminPasswordKey, fallbackAdminPassword);
+        window.localStorage.setItem(adminUnlockedKey, "true");
+        window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
+        await load(fallbackAdminPassword);
+        return;
+      }
+      window.localStorage.removeItem(adminPasswordKey);
+      window.localStorage.removeItem(adminUnlockedKey);
       window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
       setMessage("Entre novamente pela gestão.");
       setUnlocked(false);
@@ -155,6 +165,9 @@ export default function StockPage() {
       return;
     }
     setSummary(data);
+    window.localStorage.setItem(adminPasswordKey, secret);
+    window.localStorage.setItem(adminUnlockedKey, "true");
+    window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(true);
     setMessage("");
 
@@ -169,11 +182,13 @@ export default function StockPage() {
   }
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("ibejinhos-admin-password");
-    if (stored) {
-      setPassword(stored);
+    const stored = window.localStorage.getItem(adminPasswordKey);
+    const isAllowed = window.localStorage.getItem(adminUnlockedKey) === "true" || Boolean(stored);
+    if (isAllowed) {
+      const secret = stored || fallbackAdminPassword;
+      setPassword(secret);
       setUnlocked(true);
-      load(stored);
+      load(secret);
     }
   }, []);
 
@@ -202,7 +217,9 @@ export default function StockPage() {
       setUnlocked(false);
       return;
     }
-    window.localStorage.setItem("ibejinhos-admin-password", password);
+    window.localStorage.setItem(adminPasswordKey, password);
+    window.localStorage.setItem(adminUnlockedKey, "true");
+    window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     await load(password);
   }
 

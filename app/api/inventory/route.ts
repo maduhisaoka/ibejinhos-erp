@@ -1,17 +1,5 @@
 import { NextResponse } from "next/server";
 import { isAdminPassword } from "@/lib/adminAuth";
-import {
-  addIngredientEntry,
-  deleteIngredient,
-  deleteInventoryProduct,
-  deleteTechnicalCard,
-  listInventorySummary,
-  registerInventorySale,
-  registerProduction,
-  upsertIngredient,
-  upsertInventoryProduct,
-  upsertTechnicalCard
-} from "@/lib/inventory";
 
 export const runtime = "nodejs";
 
@@ -23,26 +11,31 @@ function errorResponse(error: unknown, status = 400) {
   return NextResponse.json({ error: error instanceof Error ? error.message : "Não foi possível concluir a ação." }, { status });
 }
 
+function emptyInventorySummary() {
+  return {
+    ingredients: [],
+    products: [],
+    productions: [],
+    sales: [],
+    movements: [],
+    totalStockValue: 0,
+    lowIngredients: [],
+    averageProductCost: 0,
+    topProducts: []
+  };
+}
+
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
   try {
+    const { listInventorySummary } = await import("@/lib/inventory");
     return NextResponse.json(listInventorySummary());
   } catch (error) {
     console.error("Falha ao carregar estoque.", error);
-    return NextResponse.json({
-      ingredients: [],
-      products: [],
-      productions: [],
-      sales: [],
-      movements: [],
-      totalStockValue: 0,
-      lowIngredients: [],
-      averageProductCost: 0,
-      topProducts: []
-    });
+    return NextResponse.json(emptyInventorySummary());
   }
 }
 
@@ -55,37 +48,39 @@ export async function POST(request: Request) {
   const action = String(payload.action ?? "");
 
   try {
+    const inventory = await import("@/lib/inventory");
+
     if (action === "saveIngredient") {
-      return NextResponse.json({ id: upsertIngredient(payload.ingredient) });
+      return NextResponse.json({ id: inventory.upsertIngredient(payload.ingredient) });
     }
     if (action === "deleteIngredient") {
-      deleteIngredient(Number(payload.id));
+      inventory.deleteIngredient(Number(payload.id));
       return NextResponse.json({ ok: true });
     }
     if (action === "ingredientEntry") {
-      addIngredientEntry(payload.entry);
+      inventory.addIngredientEntry(payload.entry);
       return NextResponse.json({ ok: true });
     }
     if (action === "saveProduct") {
-      return NextResponse.json({ id: upsertInventoryProduct(payload.product) });
+      return NextResponse.json({ id: inventory.upsertInventoryProduct(payload.product) });
     }
     if (action === "deleteProduct") {
-      deleteInventoryProduct(Number(payload.id));
+      inventory.deleteInventoryProduct(Number(payload.id));
       return NextResponse.json({ ok: true });
     }
     if (action === "saveCard") {
-      return NextResponse.json({ id: upsertTechnicalCard(payload.card) });
+      return NextResponse.json({ id: inventory.upsertTechnicalCard(payload.card) });
     }
     if (action === "deleteCard") {
-      deleteTechnicalCard(Number(payload.productId));
+      inventory.deleteTechnicalCard(Number(payload.productId));
       return NextResponse.json({ ok: true });
     }
     if (action === "production") {
-      registerProduction(payload.production);
+      inventory.registerProduction(payload.production);
       return NextResponse.json({ ok: true });
     }
     if (action === "sale") {
-      registerInventorySale(payload.sale);
+      inventory.registerInventorySale(payload.sale);
       return NextResponse.json({ ok: true });
     }
 
