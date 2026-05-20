@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
+import { isAdminPassword } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const password = request.headers.get("x-admin-password");
-  const expectedPassword = process.env.ADMIN_PASSWORD ?? "ibejinhos123";
 
-  if (!password || password !== expectedPassword) {
+  if (!isAdminPassword(password)) {
     return NextResponse.json({ error: "Senha invalida." }, { status: 401 });
   }
 

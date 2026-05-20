@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { isAdminPassword } from "@/lib/adminAuth";
 import { createErpExpense, getErpSummary, toggleExpensePaid, updateLoyaltyRules } from "@/lib/erp";
 
 export const runtime = "nodejs";
 
 function isAuthorized(request: Request) {
-  const password = request.headers.get("x-admin-password");
-  return password && password === (process.env.ADMIN_PASSWORD ?? "ibejinhos123");
+  return isAdminPassword(request.headers.get("x-admin-password"));
 }
 
 function errorResponse(error: unknown, status = 400) {

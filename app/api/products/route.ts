@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { isAdminPassword } from "@/lib/adminAuth";
 import { listProducts, upsertProduct } from "@/lib/db";
 
 export const runtime = "nodejs";
 
 function isAuthorized(request: Request) {
-  const password = request.headers.get("x-admin-password");
-  return password && password === (process.env.ADMIN_PASSWORD ?? "ibejinhos123");
+  return isAdminPassword(request.headers.get("x-admin-password"));
 }
 
 export async function GET(request: Request) {

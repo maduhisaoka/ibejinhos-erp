@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAdminPassword } from "@/lib/adminAuth";
 import { createOrder, deleteOrder, getCustomerByCpf, getLoyaltySummary, getStoreSettings, listOrders, makeOrderNumber, updateOrderDelivered, updateOrderNumber, updateOrderStatus } from "@/lib/db";
 import { validateCep } from "@/lib/cep";
 import { isBirthdayWeek } from "@/lib/coupons";
@@ -10,8 +11,7 @@ import type { CartItem, PaymentMethod } from "@/lib/types";
 export const runtime = "nodejs";
 
 function isAuthorized(request: Request) {
-  const password = request.headers.get("x-admin-password");
-  return password && password === (process.env.ADMIN_PASSWORD ?? "ibejinhos123");
+  return isAdminPassword(request.headers.get("x-admin-password"));
 }
 
 function calculateSubtotal(items: CartItem[]) {
