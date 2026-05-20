@@ -22,6 +22,12 @@ const cards = [
     title: "ERP geral",
     text: "Financeiro, CRM, marketing, entregas, auditoria e inteligencia do negocio.",
     icon: Bike
+  },
+  {
+    href: "/",
+    title: "Ver loja",
+    text: "Abrir a loja como cliente para conferir vitrine, cardapio e experiencia de compra.",
+    icon: ShoppingBag
   }
 ];
 
@@ -34,7 +40,16 @@ export default function GestaoPage() {
     const stored = window.localStorage.getItem("ibejinhos-admin-password");
     if (stored) {
       setPassword(stored);
-      setUnlocked(true);
+      fetch("/api/admin-auth", { headers: { "x-admin-password": stored } }).then((response) => {
+        if (response.ok) {
+          setUnlocked(true);
+          return;
+        }
+        window.localStorage.removeItem("ibejinhos-admin-password");
+        window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
+        setPassword("");
+        setUnlocked(false);
+      });
     }
   }, []);
 
@@ -48,12 +63,14 @@ export default function GestaoPage() {
       return;
     }
     window.localStorage.setItem("ibejinhos-admin-password", password);
+    window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(true);
     setMessage("");
   }
 
   function logout() {
     window.localStorage.removeItem("ibejinhos-admin-password");
+    window.dispatchEvent(new Event("ibejinhos-admin-auth-changed"));
     setUnlocked(false);
     setPassword("");
   }
@@ -84,7 +101,7 @@ export default function GestaoPage() {
         <button onClick={logout} className="rounded-full bg-white px-5 py-3 font-black text-cocoa shadow-soft">Sair</button>
       </div>
 
-      <section className="grid gap-5 md:grid-cols-3">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <Link key={card.href} href={card.href} className="rounded-lg border border-cocoa/10 bg-white/82 p-5 shadow-soft transition hover:-translate-y-1 hover:bg-white">
             <card.icon className="text-gold" size={30} />

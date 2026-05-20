@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff, Lock, Plus, Save, Trash2 } from "@/components/Icons";
 import { formatCurrency } from "@/lib/format";
@@ -464,20 +465,13 @@ export default function AdminPage() {
   if (!unlocked) {
     return (
       <main className="mx-auto grid min-h-[calc(100vh-76px)] max-w-md place-items-center px-4">
-        <form onSubmit={handleLogin} className="w-full rounded-lg border border-cocoa/10 bg-white/78 p-6 shadow-soft">
+        <div className="w-full rounded-lg border border-cocoa/10 bg-white/78 p-6 shadow-soft">
           <Lock className="mb-4 text-gold" size={30} />
           <h1 className="text-2xl font-bold text-cocoa">Painel da Ibejinhos</h1>
-          <p className="mt-2 leading-6 text-truffle">Entre com a senha para cuidar do cardápio e ver pedidos recebidos localmente.</p>
-          <input
-            className="mt-5 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3"
-            placeholder="Senha"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
+          <p className="mt-2 leading-6 text-truffle">Esta area fica dentro da gestao. Entre primeiro pela central administrativa.</p>
           {message && <p className="mt-3 rounded-lg bg-blush p-3 text-sm text-cocoa">{message}</p>}
-          <button type="submit" className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-bold text-cream">Entrar</button>
-        </form>
+          <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-bold text-cream">Ir para gestao</Link>
+        </div>
       </main>
     );
   }

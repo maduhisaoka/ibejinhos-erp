@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Bike, Gift, Lock, Plus, Save } from "@/components/Icons";
 import { formatCurrency } from "@/lib/format";
@@ -141,14 +142,13 @@ export default function ErpPage() {
   if (!unlocked || !summary) {
     return (
       <main className="mx-auto grid min-h-[calc(100vh-76px)] max-w-md place-items-center px-4">
-        <form onSubmit={handleLogin} className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
+        <div className="w-full rounded-lg border border-cocoa/10 bg-white/85 p-6 shadow-soft">
           <Lock className="mb-4 text-gold" size={30} />
           <h1 className="text-2xl font-black text-cocoa">ERP Ibejinhos</h1>
-          <p className="mt-2 leading-6 text-truffle">Entre com a senha do painel para ver financeiro, CRM, fidelidade, marketing e entregas.</p>
-          <input className="mt-5 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Senha" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+          <p className="mt-2 leading-6 text-truffle">Esta area fica dentro da gestao. Entre primeiro pela central administrativa.</p>
           {message && <p className="mt-3 rounded-lg bg-blush/45 p-3 text-sm font-bold text-cocoa">{message}</p>}
-          <button type="submit" className="mt-5 w-full rounded-full bg-cocoa px-5 py-3 font-black text-cream">Entrar</button>
-        </form>
+          <Link href="/gestao" className="mt-5 inline-flex w-full justify-center rounded-full bg-cocoa px-5 py-3 font-black text-cream">Ir para gestao</Link>
+        </div>
       </main>
     );
   }

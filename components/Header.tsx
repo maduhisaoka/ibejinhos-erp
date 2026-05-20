@@ -10,11 +10,22 @@ import { useCart } from "@/components/CartContext";
 export function Header() {
   const { count } = useCart();
   const pathname = usePathname();
-  const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/estoque") || pathname.startsWith("/erp");
+  const isAdminArea = pathname.startsWith("/gestao") || pathname.startsWith("/admin") || pathname.startsWith("/estoque") || pathname.startsWith("/erp");
   const [adminUnlocked, setAdminUnlocked] = useState(false);
 
   useEffect(() => {
-    setAdminUnlocked(Boolean(window.localStorage.getItem("ibejinhos-admin-password")));
+    function syncAdminAccess() {
+      setAdminUnlocked(Boolean(window.localStorage.getItem("ibejinhos-admin-password")));
+    }
+
+    syncAdminAccess();
+    window.addEventListener("storage", syncAdminAccess);
+    window.addEventListener("ibejinhos-admin-auth-changed", syncAdminAccess);
+
+    return () => {
+      window.removeEventListener("storage", syncAdminAccess);
+      window.removeEventListener("ibejinhos-admin-auth-changed", syncAdminAccess);
+    };
   }, [pathname]);
 
   return (
