@@ -26,6 +26,14 @@ type ItemTotal = {
   revenue: number;
 };
 
+function ProductImage({ src, alt }: { src: string; alt: string }) {
+  if (src.startsWith("data:")) {
+    return <img src={src} alt={alt} className="h-full w-full object-cover" />;
+  }
+
+  return <Image src={src} alt={alt} fill className="object-cover" unoptimized={src.startsWith("/uploads/")} />;
+}
+
 function getOrderDate(order: Order) {
   return new Date(order.createdAt);
 }
@@ -547,7 +555,7 @@ export default function AdminPage() {
             <h2 className="text-xl font-bold text-cocoa">Produto</h2>
             <div className="mt-4 space-y-3">
               <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-cream">
-                {editing.image && <Image src={editing.image} alt={editing.name || "Foto do produto"} fill className="object-cover" />}
+                {editing.image && <ProductImage src={editing.image} alt={editing.name || "Foto do produto"} />}
               </div>
               <label className="block rounded-lg bg-cream px-4 py-3 text-sm font-bold text-cocoa">
                 Anexar foto oficial do produto
@@ -580,7 +588,7 @@ export default function AdminPage() {
                 >
                   <span className="flex min-w-0 items-center gap-3">
                     <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-cream">
-                      <Image src={product.image} alt={product.name} fill className="object-cover" />
+                      <ProductImage src={product.image} alt={product.name} />
                     </span>
                     <span>
                       <span className="block font-semibold text-cocoa">{product.name}</span>

@@ -36,13 +36,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Envie um arquivo." }, { status: 400 });
   }
 
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (type === "products") {
+    const mimeType = file.type || `image/${getExtension(file)}`;
+    const base64 = buffer.toString("base64");
+    return NextResponse.json({ url: `data:${mimeType};base64,${base64}` });
+  }
+
   const folder = type === "receipts" ? "receipts" : "products";
   const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
   await mkdir(uploadDir, { recursive: true });
 
   const filename = `${randomUUID()}.${getExtension(file)}`;
   const fullPath = path.join(uploadDir, filename);
-  const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(fullPath, buffer);
 
   const url = `/uploads/${folder}/${filename}`;

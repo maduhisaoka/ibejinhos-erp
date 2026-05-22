@@ -9,6 +9,14 @@ import { getCustomerSession, type CustomerSession } from "@/lib/customerSession"
 import { formatCurrency } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
+function ProductImage({ src, alt }: { src: string; alt: string }) {
+  if (src.startsWith("data:")) {
+    return <img src={src} alt={alt} className="h-full w-full object-cover" />;
+  }
+
+  return <Image src={src} alt={alt} fill className="object-cover" unoptimized={src.startsWith("/uploads/")} />;
+}
+
 export function ProductGrid({ products }: { products: Product[] }) {
   const { addItem, count, items, updateQuantity } = useCart();
   const [session, setSession] = useState<CustomerSession | null>(null);
@@ -31,7 +39,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
           return (
             <article key={product.id} className="overflow-hidden rounded-lg border border-cocoa/10 bg-white/72 shadow-soft">
               <div className="relative aspect-[4/3] bg-blush/40">
-                <Image src={product.image} alt={product.name} fill className="object-cover" />
+                <ProductImage src={product.image} alt={product.name} />
                 {selectedQuantity > 0 && (
                   <span className="absolute right-3 top-3 rounded-full bg-blush px-3 py-1 text-sm font-black text-white shadow-soft">
                     {selectedQuantity} selecionado{selectedQuantity > 1 ? "s" : ""}

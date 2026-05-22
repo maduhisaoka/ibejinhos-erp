@@ -280,6 +280,72 @@ https://ibejinhos-erp.vercel.app
 https://ibejinhos-erp.vercel.app/gestao
 ```
 
+## Criar Um Site De Teste Antes Do Oficial
+
+Use este fluxo para testar mudancas sem mexer no site principal.
+
+### Como Vai Funcionar
+
+- `main`: versao oficial, ligada ao site principal.
+- `teste`: versao de teste, usada para validar alteracoes antes de publicar.
+
+Quando voce envia a branch `teste` para o GitHub, a Vercel cria automaticamente um link de Preview. Esse link e separado do site oficial.
+
+### Criar A Versao De Teste
+
+Dentro da pasta do projeto, rode:
+
+```bash
+git checkout -b teste
+git push -u origin teste
+```
+
+Depois disso:
+
+1. Abra a Vercel.
+2. Entre no projeto `ibejinhos-erp`.
+3. Clique em `Deployments`.
+4. Procure o deploy da branch `teste`.
+5. Abra o link de Preview.
+
+Esse link sera o seu site de teste.
+
+### Testar Mudancas No Site De Teste
+
+Sempre que quiser testar uma alteracao:
+
+```bash
+git checkout teste
+git add .
+git commit -m "Teste de ajustes"
+git push
+```
+
+A Vercel vai gerar uma nova versao de teste automaticamente.
+
+### Aprovar E Jogar Para O Site Oficial
+
+Quando a versao de teste estiver certa:
+
+```bash
+git checkout main
+git merge teste
+git push origin main
+```
+
+A Vercel vai atualizar o site oficial.
+
+### Importante
+
+Use variaveis de ambiente tambem para Preview na Vercel:
+
+1. Abra `Settings > Environment Variables`.
+2. Confira cada variavel.
+3. Marque tambem o ambiente `Preview`.
+4. Salve.
+
+Sem isso, o site de teste pode abrir mas nao conseguir acessar Supabase, senha da gestao ou configuracoes de entrega.
+
 ## Configurar Dominio Proprio
 
 1. Na Vercel, abra o projeto.
