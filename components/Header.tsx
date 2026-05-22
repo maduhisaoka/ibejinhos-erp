@@ -38,7 +38,6 @@ export function Header() {
           </span>
           <span>
             <span className="block text-xl font-black leading-none tracking-wide">Ibejinhos</span>
-            <span className="text-xs font-semibold text-truffle">Doces artesanais</span>
           </span>
         </Link>
 
