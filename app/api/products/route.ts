@@ -8,6 +8,13 @@ function isAuthorized(request: Request) {
   return isAdminPassword(request.headers.get("x-admin-password"));
 }
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Erro desconhecido.";
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const includeInactive = searchParams.get("admin") === "true";
@@ -45,6 +52,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ id });
   } catch (error) {
     console.error("Falha ao salvar produto.", error);
-    return NextResponse.json({ error: "Não foi possível salvar o produto no cardápio." }, { status: 500 });
+    return NextResponse.json(
+      { error: `Não foi possível salvar o produto no cardápio. Detalhe: ${getErrorMessage(error)}` },
+      { status: 500 }
+    );
   }
 }

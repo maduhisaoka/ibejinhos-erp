@@ -224,6 +224,24 @@ async function ensurePostgresProductsSeeded() {
   if (!usePostgres) return;
 
   const prisma = getPrisma();
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      price DOUBLE PRECISION NOT NULL,
+      image TEXT NOT NULL,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      flavor_limit INTEGER NOT NULL DEFAULT 0,
+      flavors JSONB NOT NULL DEFAULT '[]'::jsonb
+    )
+  `);
+  await prisma.$executeRawUnsafe("ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT 'Produto artesanal Ibejinhos.'");
+  await prisma.$executeRawUnsafe("ALTER TABLE products ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '/products/brigadeiro-gourmet.svg'");
+  await prisma.$executeRawUnsafe("ALTER TABLE products ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE");
+  await prisma.$executeRawUnsafe("ALTER TABLE products ADD COLUMN IF NOT EXISTS flavor_limit INTEGER NOT NULL DEFAULT 0");
+  await prisma.$executeRawUnsafe("ALTER TABLE products ADD COLUMN IF NOT EXISTS flavors JSONB NOT NULL DEFAULT '[]'::jsonb");
+
   const count = await prisma.product.count();
   if (count > 0) return;
 
@@ -258,6 +276,7 @@ export async function listProducts(includeInactive = false) {
 
 export async function upsertProduct(product: Partial<Product> & Omit<Product, "id"> & { id?: number }) {
   if (usePostgres) {
+    await ensurePostgresProductsSeeded();
     const data = {
       name: product.name,
       description: product.description,
