@@ -275,7 +275,11 @@ export default function CarrinhoPage() {
       discount > 0 ? `${discountLabel}: -${formatCurrency(discount)}` : "",
       firstOrderFreeDelivery ? "Taxa de entrega: grátis no primeiro pedido" : `Taxa de entrega: ${formatCurrency(deliveryFee)}`,
       `Total: ${formatCurrency(total)}`,
-      `Pagamento: ${paymentLabel(paymentMethod)}`
+      `Pagamento: ${paymentLabel(paymentMethod)}`,
+      "",
+      paymentMethod === "Pix"
+        ? "Vou enviar o comprovante do Pix por aqui para confirmar meu pedido."
+        : "Vou enviar o comprovante/confirmacao de pagamento por aqui para confirmar meu pedido."
     ].filter(Boolean);
 
     return lines.join("\n");
@@ -364,8 +368,11 @@ export default function CarrinhoPage() {
 
     const url = `https://wa.me/${onlyDigits(whatsappNumber)}?text=${encodeURIComponent(buildWhatsAppMessage(data.orderNumber ?? data.id))}`;
     clearCart();
-    setSuccessMessage("Seu pedido já foi realizado. A Ibejinhos entrará em contato para confirmação do pedido.");
-    window.open(url, "_blank", "noopener,noreferrer");
+    setSuccessMessage("Seu pedido foi criado. O WhatsApp vai abrir para você enviar a mensagem e anexar o comprovante.");
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      window.location.href = url;
+    }
   }
 
   return (
