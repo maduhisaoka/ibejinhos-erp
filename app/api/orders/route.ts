@@ -158,7 +158,8 @@ export async function POST(request: Request) {
   const deliveryFee = loyalty.previousOrders === 0 ? 0 : deliveryEstimate.deliveryFee;
   const distanceKm = deliveryEstimate.distanceKm;
   const birthdayDiscountRate = isBirthdayWeek(birthdayDay, birthdayMonth) ? 0.15 : 0;
-  const discountRate = Math.max(loyalty.discountRate, birthdayDiscountRate);
+  const firstOrderDiscountRate = loyalty.previousOrders === 0 ? 0.1 : 0;
+  const discountRate = Math.max(loyalty.discountRate, birthdayDiscountRate, firstOrderDiscountRate);
   const discount = Number((subtotal * discountRate).toFixed(2));
   const paymentMethod = String(payload.paymentMethod ?? "Pix") === "Credito" ? "Credito" : "Pix" as PaymentMethod;
 

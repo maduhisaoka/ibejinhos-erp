@@ -147,7 +147,9 @@ export default function CarrinhoPage() {
   const firstOrderFreeDelivery = Boolean(loyalty && loyalty.previousOrders === 0);
   const deliveryFee = firstOrderFreeDelivery ? 0 : deliveryEstimate?.deliveryFee ?? 0;
   const birthdayDiscountRate = isBirthdayWeek(customer.birthdayDay, customer.birthdayMonth) ? 0.15 : 0;
-  const discountRate = Math.max(loyalty?.discountRate ?? 0, birthdayDiscountRate);
+  const firstOrderDiscountRate = firstOrderFreeDelivery ? 0.1 : 0;
+  const discountRate = Math.max(loyalty?.discountRate ?? 0, birthdayDiscountRate, firstOrderDiscountRate);
+  const discountLabel = firstOrderDiscountRate > 0 ? "Cupom primeiro pedido" : birthdayDiscountRate > 0 ? "Desconto aniversário" : "Desconto fidelidade";
   const discount = Number((subtotal * discountRate).toFixed(2));
   const total = subtotal + deliveryFee - discount;
   const missingMinimum = subtotal < settings.minimumOrderValue;
@@ -270,7 +272,7 @@ export default function CarrinhoPage() {
       }),
       "",
       `Subtotal: ${formatCurrency(subtotal)}`,
-      discount > 0 ? `Desconto fidelidade: -${formatCurrency(discount)}` : "",
+      discount > 0 ? `${discountLabel}: -${formatCurrency(discount)}` : "",
       firstOrderFreeDelivery ? "Taxa de entrega: grátis no primeiro pedido" : `Taxa de entrega: ${formatCurrency(deliveryFee)}`,
       `Total: ${formatCurrency(total)}`,
       `Pagamento: ${paymentLabel(paymentMethod)}`
@@ -435,11 +437,6 @@ export default function CarrinhoPage() {
               {session.email} - {session.whatsapp}
             </div>
           )}
-          {firstOrderFreeDelivery && (
-            <p className="rounded-lg bg-white p-3 text-sm font-bold leading-6 text-cocoa">
-              Primeiro pedido: frete grátis aplicado.
-            </p>
-          )}
           {birthdayDiscountRate > 0 && (
             <p className="rounded-lg bg-white p-3 text-sm font-bold leading-6 text-cocoa">
               Cupom de aniversário ativo: 15% de desconto nesta semana.
@@ -482,7 +479,7 @@ export default function CarrinhoPage() {
                 <span>Pedido mínimo</span><strong>{formatCurrency(settings.minimumOrderValue)}</strong>
               </div>
             )}
-            {discount > 0 && <div className="flex justify-between text-blush"><span>{birthdayDiscountRate > 0 ? "Desconto aniversário" : "Desconto fidelidade"}</span><strong>-{formatCurrency(discount)}</strong></div>}
+            {discount > 0 && <div className="flex justify-between text-blush"><span>{discountLabel}</span><strong>-{formatCurrency(discount)}</strong></div>}
             <div className="flex justify-between">
               <span>Taxa de entrega</span>
               <strong>{deliveryAddress.neighborhood && deliveryAvailable ? firstOrderFreeDelivery ? "Gratis" : formatCurrency(deliveryFee) : "Informe o bairro"}</strong>
