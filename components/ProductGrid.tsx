@@ -28,8 +28,15 @@ export function ProductGrid({ products }: { products: Product[] }) {
   return (
     <>
       {!session && (
-        <div className="mb-5 flex justify-end">
-          <Link className="rounded-full bg-cocoa px-5 py-3 text-sm font-bold text-cream shadow-soft" href="/cliente">Entrar ou cadastrar</Link>
+        <div className="mb-5 space-y-3">
+          <div className="overflow-hidden rounded-full bg-blush/45 py-3 text-cocoa shadow-soft">
+            <div className="animate-[marquee_14s_linear_infinite] whitespace-nowrap text-sm font-black uppercase tracking-[0.14em]">
+              No seu primeiro pedido, ganhe 10% de desconto + frete grátis
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Link className="rounded-full bg-cocoa px-5 py-3 text-sm font-bold text-cream shadow-soft" href="/cliente">Entrar ou cadastrar</Link>
+          </div>
         </div>
       )}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
