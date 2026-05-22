@@ -280,6 +280,33 @@ https://ibejinhos-erp.vercel.app
 https://ibejinhos-erp.vercel.app/gestao
 ```
 
+## Deixar O Site Invisivel Ate O Lancamento
+
+O projeto tem um modo de pre-lancamento.
+
+Na Vercel, em `Settings > Environment Variables`, deixe:
+
+```env
+SITE_LAUNCHED="false"
+NEXT_PUBLIC_SITE_LAUNCHED="false"
+```
+
+Com isso:
+
+- clientes veem somente a pagina `/em-breve`
+- loja, cardapio, carrinho e area do cliente ficam escondidos
+- a gestao continua funcionando em `/gestao`
+- as paginas internas `/admin`, `/estoque` e `/erp` continuam acessiveis para voce
+
+No dia do lancamento, troque as duas variaveis para:
+
+```env
+SITE_LAUNCHED="true"
+NEXT_PUBLIC_SITE_LAUNCHED="true"
+```
+
+Depois clique em `Redeploy` na Vercel.
+
 ## Configurar Dominio Proprio
 
 1. Na Vercel, abra o projeto.
