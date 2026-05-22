@@ -11,7 +11,12 @@ function isAuthorized(request: Request) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const includeInactive = searchParams.get("admin") === "true";
-  return NextResponse.json(await listProducts(includeInactive));
+  try {
+    return NextResponse.json(await listProducts(includeInactive));
+  } catch (error) {
+    console.error("Falha ao carregar produtos.", error);
+    return NextResponse.json({ error: "Não foi possível carregar o cardápio." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -25,16 +30,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Preencha nome, descricao, imagem e preco." }, { status: 400 });
   }
 
-  const id = await upsertProduct({
-    id: payload.id ? Number(payload.id) : undefined,
-    name: String(payload.name),
-    description: String(payload.description),
-    price: Number(payload.price),
-    image: String(payload.image),
-    active: Boolean(payload.active),
-    flavorLimit: Number(payload.flavorLimit ?? 0),
-    flavors: Array.isArray(payload.flavors) ? payload.flavors.map(String) : []
-  });
+  try {
+    const id = await upsertProduct({
+      id: payload.id ? Number(payload.id) : undefined,
+      name: String(payload.name),
+      description: String(payload.description),
+      price: Number(payload.price),
+      image: String(payload.image),
+      active: Boolean(payload.active),
+      flavorLimit: Number(payload.flavorLimit ?? 0),
+      flavors: Array.isArray(payload.flavors) ? payload.flavors.map(String) : []
+    });
 
-  return NextResponse.json({ id });
+    return NextResponse.json({ id });
+  } catch (error) {
+    console.error("Falha ao salvar produto.", error);
+    return NextResponse.json({ error: "Não foi possível salvar o produto no cardápio." }, { status: 500 });
+  }
 }

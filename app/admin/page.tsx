@@ -26,6 +26,43 @@ type ItemTotal = {
   revenue: number;
 };
 
+function ProductPhoto({ src, alt }: { src: string; alt: string }) {
+  if (src.startsWith("data:")) {
+    return <img src={src} alt={alt} className="h-full w-full object-cover" />;
+  }
+
+  return <Image src={src} alt={alt} fill className="object-cover" unoptimized={src.startsWith("/uploads/")} />;
+}
+
+function resizeProductPhoto(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Não foi possível ler a foto."));
+    reader.onload = () => {
+      const image = document.createElement("img");
+      image.onerror = () => reject(new Error("Não foi possível abrir a foto."));
+      image.onload = () => {
+        const maxSize = 900;
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("Não foi possível preparar a foto."));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function getOrderDate(order: Order) {
   return new Date(order.createdAt);
 }
@@ -189,6 +226,7 @@ export default function AdminPage() {
 
   async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage("Salvando produto...");
     const response = await fetch("/api/products", {
       method: "POST",
       headers: {
@@ -199,7 +237,7 @@ export default function AdminPage() {
     });
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       setMessage(data.error ?? "Não foi possível salvar.");
       return;
     }
@@ -255,10 +293,13 @@ export default function AdminPage() {
 
   async function handleProductPhotoUpload(file: File | undefined) {
     if (!file) return;
-    const url = await uploadFile(file, "products");
-    if (url) {
+    try {
+      setMessage("Preparando foto...");
+      const url = await resizeProductPhoto(file);
       setEditing((current) => ({ ...current, image: url }));
-      setMessage("Foto do produto anexada. Clique em salvar produto para confirmar.");
+      setMessage("Foto anexada. Clique em salvar produto para confirmar.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Não foi possível anexar a foto.");
     }
   }
 
@@ -547,7 +588,7 @@ export default function AdminPage() {
             <h2 className="text-xl font-bold text-cocoa">Produto</h2>
             <div className="mt-4 space-y-3">
               <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-cream">
-                {editing.image && <Image src={editing.image} alt={editing.name || "Foto do produto"} fill className="object-cover" />}
+                {editing.image && <ProductPhoto src={editing.image} alt={editing.name || "Foto do produto"} />}
               </div>
               <label className="block rounded-lg bg-cream px-4 py-3 text-sm font-bold text-cocoa">
                 Anexar foto oficial do produto
@@ -580,7 +621,7 @@ export default function AdminPage() {
                 >
                   <span className="flex min-w-0 items-center gap-3">
                     <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-cream">
-                      <Image src={product.image} alt={product.name} fill className="object-cover" />
+                      <ProductPhoto src={product.image} alt={product.name} />
                     </span>
                     <span>
                       <span className="block font-semibold text-cocoa">{product.name}</span>
