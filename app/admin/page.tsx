@@ -27,11 +27,12 @@ type ItemTotal = {
 };
 
 function ProductPhoto({ src, alt }: { src: string; alt: string }) {
-  if (src.startsWith("data:")) {
-    return <img src={src} alt={alt} className="h-full w-full object-cover" />;
+  const source = src || "/products/brigadeiro-gourmet.svg";
+  if (source.startsWith("data:")) {
+    return <img src={source} alt={alt} className="h-full w-full object-cover" />;
   }
 
-  return <Image src={src} alt={alt} fill className="object-cover" unoptimized={src.startsWith("/uploads/")} />;
+  return <Image src={source} alt={alt} fill className="object-cover" unoptimized={source.startsWith("/uploads/")} />;
 }
 
 function resizeProductPhoto(file: File) {
@@ -42,7 +43,7 @@ function resizeProductPhoto(file: File) {
       const image = document.createElement("img");
       image.onerror = () => reject(new Error("Não foi possível abrir a foto."));
       image.onload = () => {
-        const maxSize = 900;
+        const maxSize = 520;
         const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
         const canvas = document.createElement("canvas");
         canvas.width = Math.max(1, Math.round(image.width * scale));
@@ -55,7 +56,7 @@ function resizeProductPhoto(file: File) {
         }
 
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
       };
       image.src = String(reader.result);
     };
@@ -597,9 +598,13 @@ export default function AdminPage() {
               <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Nome" value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} />
               <textarea className="min-h-28 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Descrição" value={editing.description} onChange={(event) => setEditing({ ...editing, description: event.target.value })} />
               <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Preço" type="number" step="0.01" value={editing.price || ""} onChange={(event) => setEditing({ ...editing, price: Number(event.target.value) })} />
-              <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Caminho da imagem" value={editing.image} onChange={(event) => setEditing({ ...editing, image: event.target.value })} />
-              <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Quantidade de sabores permitidos" type="number" min="0" value={editing.flavorLimit || ""} onChange={(event) => setEditing({ ...editing, flavorLimit: Number(event.target.value) })} />
-              <textarea className="min-h-20 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Sabores separados por vírgula" value={(editing.flavors ?? []).join(", ")} onChange={(event) => setEditing({ ...editing, flavors: event.target.value.split(",").map((flavor) => flavor.trim()).filter(Boolean) })} />
+              <input className="w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Quantidade de sabores que o cliente deve escolher" type="number" min="0" value={editing.flavorLimit || ""} onChange={(event) => setEditing({ ...editing, flavorLimit: Number(event.target.value) })} />
+              <label className="block">
+                <span className="mb-2 block text-sm font-bold leading-6 text-cocoa">
+                  Sabores para escolha em kits. Escreva um sabor, coloque vírgula, depois outro sabor. Exemplo: Tradicional, Ninho, Beijinho.
+                </span>
+                <textarea className="min-h-20 w-full rounded-lg border border-cocoa/15 bg-cream px-4 py-3" placeholder="Tradicional, Ninho, Beijinho" value={(editing.flavors ?? []).join(", ")} onChange={(event) => setEditing({ ...editing, flavors: event.target.value.split(",").map((flavor) => flavor.trim()).filter(Boolean) })} />
+              </label>
               <label className="flex items-center gap-3 rounded-lg bg-cream px-4 py-3 text-cocoa">
                 <input type="checkbox" checked={editing.active} onChange={(event) => setEditing({ ...editing, active: event.target.checked })} />
                 Produto ativo no cardápio

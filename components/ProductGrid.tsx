@@ -10,11 +10,12 @@ import { formatCurrency } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
 function ProductPhoto({ src, alt }: { src: string; alt: string }) {
-  if (src.startsWith("data:")) {
-    return <img src={src} alt={alt} className="h-full w-full object-cover" />;
+  const source = src || "/products/brigadeiro-gourmet.svg";
+  if (source.startsWith("data:")) {
+    return <img src={source} alt={alt} className="h-full w-full object-cover" />;
   }
 
-  return <Image src={src} alt={alt} fill className="object-cover" unoptimized={src.startsWith("/uploads/")} />;
+  return <Image src={source} alt={alt} fill className="object-cover" unoptimized={source.startsWith("/uploads/")} />;
 }
 
 export function ProductGrid({ products }: { products: Product[] }) {

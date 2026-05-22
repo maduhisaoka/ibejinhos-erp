@@ -26,17 +26,17 @@ export async function POST(request: Request) {
 
   const payload = await request.json();
 
-  if (!payload.name || !payload.description || !payload.image || Number(payload.price) <= 0) {
-    return NextResponse.json({ error: "Preencha nome, descricao, imagem e preco." }, { status: 400 });
+  if (!payload.name || Number(payload.price) <= 0) {
+    return NextResponse.json({ error: "Preencha nome e preço do produto." }, { status: 400 });
   }
 
   try {
     const id = await upsertProduct({
       id: payload.id ? Number(payload.id) : undefined,
       name: String(payload.name),
-      description: String(payload.description),
+      description: String(payload.description || "Produto artesanal Ibejinhos."),
       price: Number(payload.price),
-      image: String(payload.image),
+      image: String(payload.image || "/products/brigadeiro-gourmet.svg"),
       active: Boolean(payload.active),
       flavorLimit: Number(payload.flavorLimit ?? 0),
       flavors: Array.isArray(payload.flavors) ? payload.flavors.map(String) : []
