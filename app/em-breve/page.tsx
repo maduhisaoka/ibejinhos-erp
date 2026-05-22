@@ -5,8 +5,8 @@ export default function ComingSoonPage() {
   return (
     <main className="mx-auto grid min-h-[calc(100vh-76px)] max-w-4xl place-items-center px-4 py-12">
       <section className="text-center">
-        <div className="mx-auto mb-6 grid h-28 w-28 place-items-center rounded-full bg-white/80 shadow-soft">
-          <Image src="/brand/logo-cutout.png" alt="Ibejinhos" width={88} height={88} className="object-contain" />
+        <div className="mx-auto mb-6 grid h-28 w-28 place-items-center">
+          <Image src="/brand/logo-cutout.png" alt="Ibejinhos" width={112} height={112} className="object-contain" priority />
         </div>
         <p className="text-sm font-black uppercase tracking-[0.22em] text-gold">Ibejinhos</p>
         <h1 className="mt-4 text-4xl font-black text-cocoa sm:text-6xl">Estamos preparando uma experiência doce para você.</h1>
