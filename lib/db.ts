@@ -1,5 +1,6 @@
 import path from "node:path";
 import { seedProducts } from "@/lib/products";
+import { prisma } from "@/lib/prisma";
 import { normalizeCpf, onlyDigits } from "@/lib/format";
 import type { CartItem, LoyaltySummary, Order, OrderStatus, PaymentMethod, Product, RegisteredCustomer, StoreSettings } from "@/lib/types";
 
@@ -15,14 +16,9 @@ type SqliteDatabase = {
 
 const usePostgres = Boolean(process.env.DATABASE_URL);
 let sqliteDb: SqliteDatabase | null = null;
-let prismaClient: any = null;
 
 function getPrisma() {
-  if (!prismaClient) {
-    const { PrismaClient } = eval("require")("@prisma/client");
-    prismaClient = new PrismaClient();
-  }
-  return prismaClient;
+  return prisma as any;
 }
 
 function getSqlite() {

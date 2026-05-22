@@ -1,5 +1,6 @@
 import path from "node:path";
 import { listOrders } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { onlyDigits } from "@/lib/format";
 
 const usePostgres = Boolean(process.env.DATABASE_URL);
@@ -13,10 +14,7 @@ type SqliteDb = {
     run: (params?: Record<string, unknown>) => { lastInsertRowid?: number | bigint };
   };
 };
-type PrismaClientLike = InstanceType<typeof import("@prisma/client").PrismaClient>;
-
 let sqliteDb: SqliteDb | null = null;
-let prismaClient: PrismaClientLike | null = null;
 
 function text(value: unknown) {
   return value === null || value === undefined ? "" : String(value);
@@ -53,11 +51,8 @@ function startOfWeek(date: Date) {
   return copy;
 }
 
-function getPrisma(): PrismaClientLike {
-  if (!prismaClient) {
-    prismaClient = new (eval("require")("@prisma/client").PrismaClient)();
-  }
-  return prismaClient!;
+function getPrisma() {
+  return prisma as any;
 }
 
 function getSqlite() {
