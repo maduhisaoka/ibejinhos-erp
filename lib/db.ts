@@ -220,8 +220,29 @@ function serializeOrderItems(items: CartItem[]) {
   return JSON.stringify(items.map((item) => ({ ...item, selectedFlavors: item.selectedFlavors ?? {} })));
 }
 
+async function ensurePostgresProductsSeeded() {
+  if (!usePostgres) return;
+
+  const prisma = getPrisma();
+  const count = await prisma.product.count();
+  if (count > 0) return;
+
+  await prisma.product.createMany({
+    data: seedProducts.map((product) => ({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      image: product.image,
+      active: product.active,
+      flavorLimit: product.flavorLimit,
+      flavors: product.flavors
+    }))
+  });
+}
+
 export async function listProducts(includeInactive = false) {
   if (usePostgres) {
+    await ensurePostgresProductsSeeded();
     const rows = await getPrisma().product.findMany({
       where: includeInactive ? undefined : { active: true },
       orderBy: { id: "asc" }
@@ -246,9 +267,10 @@ export async function upsertProduct(product: Partial<Product> & Omit<Product, "i
       flavorLimit: product.flavorLimit ?? 0,
       flavors: product.flavors ?? []
     };
+    const prisma = getPrisma();
     const row = product.id
-      ? await getPrisma().product.update({ where: { id: product.id }, data })
-      : await getPrisma().product.create({ data });
+      ? await prisma.product.upsert({ where: { id: product.id }, update: data, create: data })
+      : await prisma.product.create({ data });
     return Number(row.id);
   }
 
