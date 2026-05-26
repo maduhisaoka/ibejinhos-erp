@@ -18,9 +18,14 @@ export async function PATCH(request: Request) {
   }
 
   const payload = await request.json();
-  await updateStoreSettings({
-    minimumOrderValue: Math.max(0, Number(payload.minimumOrderValue ?? 0))
-  });
+  try {
+    await updateStoreSettings({
+      minimumOrderValue: Math.max(0, Number(payload.minimumOrderValue ?? 0))
+    });
 
-  return NextResponse.json(await getStoreSettings());
+    return NextResponse.json(await getStoreSettings());
+  } catch (error) {
+    console.error("Falha ao salvar configurações.", error);
+    return NextResponse.json({ error: "Não foi possível salvar as configurações." }, { status: 500 });
+  }
 }

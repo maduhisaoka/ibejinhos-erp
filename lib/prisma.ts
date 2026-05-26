@@ -34,3 +34,21 @@ export const prisma =
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
+
+export function isPreparedStatementError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return message.includes("prepared statement") || message.includes("26000") || message.includes("42P05");
+}
+
+export async function withPrismaRetry<T>(operation: () => Promise<T>) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isPreparedStatementError(error)) {
+      throw error;
+    }
+
+    await prisma.$disconnect().catch(() => undefined);
+    return operation();
+  }
+}

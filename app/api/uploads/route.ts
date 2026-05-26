@@ -1,6 +1,3 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
 import { isAdminPassword } from "@/lib/adminAuth";
 import { updateOrderReceipt } from "@/lib/db";
@@ -23,6 +20,15 @@ function getExtension(file: File) {
   return "jpg";
 }
 
+function getMimeType(file: File) {
+  if (file.type) return file.type;
+  const extension = getExtension(file);
+  if (extension === "pdf") return "application/pdf";
+  if (extension === "png") return "image/png";
+  if (extension === "webp") return "image/webp";
+  return "image/jpeg";
+}
+
 export async function POST(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
@@ -36,18 +42,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Envie um arquivo." }, { status: 400 });
   }
 
-  const folder = type === "receipts" ? "receipts" : "products";
-  const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(uploadDir, { recursive: true });
-
-  const filename = `${randomUUID()}.${getExtension(file)}`;
-  const fullPath = path.join(uploadDir, filename);
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(fullPath, buffer);
+  const url = `data:${getMimeType(file)};base64,${buffer.toString("base64")}`;
 
-  const url = `/uploads/${folder}/${filename}`;
-
-  if (folder === "receipts") {
+  if (type === "receipts") {
     const orderId = Number(formData.get("orderId"));
     if (orderId) {
       await updateOrderReceipt(orderId, url);

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { seedProducts } from "@/lib/products";
-import { prisma } from "@/lib/prisma";
+import { prisma, withPrismaRetry } from "@/lib/prisma";
 import { normalizeCpf, onlyDigits } from "@/lib/format";
 import type { CartItem, LoyaltySummary, Order, OrderStatus, PaymentMethod, Product, RegisteredCustomer, StoreSettings } from "@/lib/types";
 
@@ -220,10 +220,10 @@ async function ensurePostgresProductsSeeded() {
   if (!usePostgres) return;
 
   const prisma = getPrisma();
-  const count = await prisma.product.count();
+  const count = Number(await withPrismaRetry(() => prisma.product.count()));
   if (count > 0) return;
 
-  await prisma.product.createMany({
+  await withPrismaRetry(() => prisma.product.createMany({
     data: seedProducts.map((product) => ({
       name: product.name,
       description: product.description,
@@ -233,16 +233,16 @@ async function ensurePostgresProductsSeeded() {
       flavorLimit: product.flavorLimit,
       flavors: product.flavors
     }))
-  });
+  }));
 }
 
 export async function listProducts(includeInactive = false) {
   if (usePostgres) {
     await ensurePostgresProductsSeeded();
-    const rows = await getPrisma().product.findMany({
+    const rows = await withPrismaRetry(() => getPrisma().product.findMany({
       where: includeInactive ? undefined : { active: true },
       orderBy: { id: "asc" }
-    });
+    }));
     return (rows as Row[]).map(mapProduct);
   }
 
@@ -265,9 +265,9 @@ export async function upsertProduct(product: Partial<Product> & Omit<Product, "i
       flavors: product.flavors ?? []
     };
     const prisma = getPrisma();
-    const row = product.id
-      ? await prisma.product.upsert({ where: { id: product.id }, update: data, create: data })
-      : await prisma.product.create({ data });
+    const row = (product.id
+      ? await withPrismaRetry(() => prisma.product.upsert({ where: { id: product.id }, update: data, create: data }))
+      : await withPrismaRetry(() => prisma.product.create({ data }))) as Row;
     return Number(row.id);
   }
 
@@ -354,7 +354,7 @@ export async function createOrder(order: Omit<Order, "id" | "createdAt">) {
 
 export async function listOrders() {
   if (usePostgres) {
-    const rows = await getPrisma().order.findMany({ orderBy: { id: "desc" } });
+    const rows = await withPrismaRetry(() => getPrisma().order.findMany({ orderBy: { id: "desc" } }));
     return (rows as Row[]).map(mapOrder);
   }
   return getSqlite().prepare("SELECT * FROM orders ORDER BY id DESC").all().map(mapOrder);
@@ -426,15 +426,20 @@ export async function listOrdersByCpf(cpf: string) {
 
 export async function getStoreSettings(): Promise<StoreSettings> {
   if (usePostgres) {
-    const row = await getPrisma().storeSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1, minimumOrderValue: 0 } });
-    return { minimumOrderValue: Number(row.minimumOrderValue ?? 0) };
+    try {
+      const row = await withPrismaRetry(() => getPrisma().storeSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1, minimumOrderValue: 0 } })) as Row;
+      return { minimumOrderValue: Number(row.minimumOrderValue ?? 0) };
+    } catch (error) {
+      console.error("Falha ao carregar configurações da loja.", error);
+      return { minimumOrderValue: 0 };
+    }
   }
   const row = getSqlite().prepare("SELECT minimum_order_value FROM store_settings WHERE id = 1").get() as { minimum_order_value?: number } | undefined;
   return { minimumOrderValue: Number(row?.minimum_order_value ?? 0) };
 }
 
 export async function updateStoreSettings(settings: StoreSettings) {
-  if (usePostgres) return getPrisma().storeSettings.upsert({ where: { id: 1 }, update: settings, create: { id: 1, ...settings } });
+  if (usePostgres) return withPrismaRetry(() => getPrisma().storeSettings.upsert({ where: { id: 1 }, update: settings, create: { id: 1, ...settings } }));
   getSqlite().prepare("UPDATE store_settings SET minimum_order_value = @minimumOrderValue WHERE id = 1").run(settings);
 }
 
@@ -453,7 +458,7 @@ export async function upsertCustomer(customer: {
   cep: string;
 }) {
   if (usePostgres) {
-    const row = await getPrisma().customer.upsert({ where: { cpf: customer.cpf }, update: customer, create: customer });
+    const row = await withPrismaRetry(() => getPrisma().customer.upsert({ where: { cpf: customer.cpf }, update: customer, create: customer })) as Row;
     return Number(row.id);
   }
   const db = getSqlite();
@@ -476,7 +481,7 @@ export async function upsertCustomer(customer: {
 
 export async function listCustomers() {
   if (usePostgres) {
-    const rows = await getPrisma().customer.findMany({ orderBy: { createdAt: "desc" } });
+    const rows = await withPrismaRetry(() => getPrisma().customer.findMany({ orderBy: { createdAt: "desc" } }));
     return (rows as Row[]).map(mapCustomer);
   }
   return getSqlite().prepare("SELECT * FROM customers ORDER BY created_at DESC").all().map(mapCustomer);

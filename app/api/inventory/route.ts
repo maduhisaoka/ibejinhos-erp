@@ -52,6 +52,13 @@ export async function POST(request: Request) {
   const action = String(payload.action ?? "");
 
   try {
+    if (process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "As ações de estoque online ainda estão em atualização. Os dados já carregam para consulta na gestão." },
+        { status: 503 }
+      );
+    }
+
     const inventory = await import("@/lib/inventory");
 
     if (action === "saveIngredient") {

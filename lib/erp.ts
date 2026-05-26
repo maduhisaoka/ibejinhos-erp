@@ -1,6 +1,6 @@
 import path from "node:path";
 import { listOrders } from "@/lib/db";
-import { prisma } from "@/lib/prisma";
+import { prisma, withPrismaRetry } from "@/lib/prisma";
 import { onlyDigits } from "@/lib/format";
 
 const usePostgres = Boolean(process.env.DATABASE_URL);
@@ -159,18 +159,31 @@ function seedSqliteErp(db: SqliteDb) {
 async function getErpRows() {
   if (usePostgres) {
     const prisma = getPrisma();
-    const [expenses, receivables, users, auditLogs, rules] = await Promise.all([
-      prisma.erpExpense.findMany({ orderBy: { dueDate: "asc" } }),
-      prisma.erpReceivable.findMany({ orderBy: { dueDate: "asc" } }),
-      prisma.appUser.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] }),
-      prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 40 }),
-      prisma.loyaltyRules.upsert({
-        where: { id: 1 },
-        update: {},
-        create: { id: 1, pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 }
-      })
-    ]);
-    return { expenses, receivables, users, auditLogs, rules };
+    try {
+      const [expenses, receivables, users, auditLogs, rules] = await Promise.all([
+        withPrismaRetry(() => prisma.erpExpense.findMany({ orderBy: { dueDate: "asc" } })),
+        withPrismaRetry(() => prisma.erpReceivable.findMany({ orderBy: { dueDate: "asc" } })),
+        withPrismaRetry(() => prisma.appUser.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] })),
+        withPrismaRetry(() => prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 40 })),
+        withPrismaRetry(() =>
+          prisma.loyaltyRules.upsert({
+            where: { id: 1 },
+            update: {},
+            create: { id: 1, pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 }
+          })
+        )
+      ]);
+      return { expenses, receivables, users, auditLogs, rules };
+    } catch (error) {
+      console.error("Falha ao carregar linhas do ERP.", error);
+      return {
+        expenses: [],
+        receivables: [],
+        users: [],
+        auditLogs: [],
+        rules: { pointsPerReal: 1, cashbackPercent: 3, vipThresholdPoints: 1200, inactiveDays: 45 }
+      };
+    }
   }
 
   const db = getSqlite();
@@ -477,7 +490,7 @@ export async function createErpExpense(payload: { name: string; category: string
   if (!data.name || data.amount <= 0 || !data.dueDate) throw new Error("Preencha despesa, valor e vencimento.");
 
   if (usePostgres) {
-    const created = await getPrisma().erpExpense.create({ data });
+    const created = await withPrismaRetry(() => getPrisma().erpExpense.create({ data })) as Row;
     await logAudit("admin", "criou despesa", "erp_expenses", data.name);
     return created.id;
   }
@@ -492,7 +505,7 @@ export async function createErpExpense(payload: { name: string; category: string
 
 export async function toggleExpensePaid(id: number, paid: boolean) {
   if (usePostgres) {
-    await getPrisma().erpExpense.update({ where: { id }, data: { paid } });
+    await withPrismaRetry(() => getPrisma().erpExpense.update({ where: { id }, data: { paid } }));
   } else {
     getSqlite().prepare("UPDATE erp_expenses SET paid = @paid WHERE id = @id").run({ id, paid: paid ? 1 : 0 });
   }
@@ -508,7 +521,7 @@ export async function updateLoyaltyRules(payload: { pointsPerReal: number; cashb
   };
 
   if (usePostgres) {
-    await getPrisma().loyaltyRules.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
+    await withPrismaRetry(() => getPrisma().loyaltyRules.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } }));
   } else {
     getSqlite().prepare(`
       UPDATE loyalty_rules
@@ -524,7 +537,7 @@ export async function updateLoyaltyRules(payload: { pointsPerReal: number; cashb
 
 async function logAudit(actor: string, action: string, entity: string, details: string) {
   if (usePostgres) {
-    await getPrisma().auditLog.create({ data: { actor, action, entity, details } });
+    await withPrismaRetry(() => getPrisma().auditLog.create({ data: { actor, action, entity, details } }));
     return;
   }
   getSqlite().prepare(`

@@ -13,7 +13,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
-  return NextResponse.json(await listCustomers());
+  try {
+    return NextResponse.json(await listCustomers());
+  } catch (error) {
+    console.error("Falha ao carregar clientes.", error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -27,6 +32,11 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Cliente inválido." }, { status: 400 });
   }
 
-  await deleteCustomer(id);
-  return NextResponse.json({ ok: true });
+  try {
+    await deleteCustomer(id);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Falha ao excluir cliente.", error);
+    return NextResponse.json({ error: "Não foi possível excluir o cliente." }, { status: 500 });
+  }
 }

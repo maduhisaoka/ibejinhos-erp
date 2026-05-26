@@ -27,7 +27,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
   }
 
-  return NextResponse.json(await listOrders());
+  try {
+    return NextResponse.json(await listOrders());
+  } catch (error) {
+    console.error("Falha ao carregar pedidos.", error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function PATCH(request: Request) {
