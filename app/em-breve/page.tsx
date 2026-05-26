@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 export default function ComingSoonPage() {
   return (
@@ -9,13 +8,10 @@ export default function ComingSoonPage() {
           <Image src="/brand/logo-cutout.png" alt="Ibejinhos" width={112} height={112} className="object-contain" priority />
         </div>
         <p className="text-sm font-black uppercase tracking-[0.22em] text-gold">Ibejinhos</p>
-        <h1 className="mt-4 text-4xl font-black text-cocoa sm:text-6xl">Estamos preparando uma experiência doce para você.</h1>
+        <h1 className="mt-4 text-4xl font-black text-cocoa sm:text-6xl">Estamos preparando uma doce experiência para você.</h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-truffle">
           A loja online ainda não foi lançada oficialmente. Em breve o cardápio estará disponível para pedidos.
         </p>
-        <Link href="/gestao" className="mt-8 inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-cocoa shadow-soft">
-          Área da gestão
-        </Link>
       </section>
     </main>
   );
